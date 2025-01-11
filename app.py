@@ -6,7 +6,11 @@ app.secret_key = '988430466tel'  # Chave secreta para gerenciamento de sessões
 
 @app.route("/")
 def inicio():
-    return render_template("entrar.html")
+    return render_template("index.html")
+
+@app.route("/entrar")
+def entrar():
+    return render_template("")
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8080)  # Define o host como localhost e a porta como 8080
