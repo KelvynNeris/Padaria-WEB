@@ -7,7 +7,7 @@ class Conexao:
             user="root",
             password="root",
             host="localhost",
-            database="padariagestao"
+            database="bd_padaria"
         )
         
         return mydb
