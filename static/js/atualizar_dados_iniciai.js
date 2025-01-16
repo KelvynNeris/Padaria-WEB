@@ -1,6 +1,6 @@
 // Certifique-se de que a função está definida de forma global
 function formatPhone() {
-    var telInput = document.getElementById('tel');
+    var telInput = document.getElementById('telefone');
     var value = telInput.value.replace(/\D/g, ''); // Remove caracteres não numéricos
 
     if (value.length > 11) value = value.slice(0, 11); // Limita a 11 dígitos

@@ -6,6 +6,7 @@ from flask import Flask, render_template, request, redirect, session, flash
 import email.message
 from dotenv import load_dotenv
 from usuario import Usuario  # Substitua pelo seu modelo de usuário
+import re
 
 # Carregar variáveis de ambiente
 load_dotenv()
@@ -13,8 +14,20 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = '988430466tel'  # Chave secreta para gerenciamento de sessões
 
+def verificar_sessao():
+    """
+    Função genérica para verificar o estado da sessão do usuário.
+    Se o usuário estiver no meio do processo de verificação incompleta,
+    a sessão será limpa.
+    """
+    if 'usuario_logado' in session and session.get('verificacao_incompleta'):
+        # Limpa a sessão de usuário e a flag de verificação incompleta
+        session.pop('usuario_logado', None)
+        session.pop('verificacao_incompleta', None)
+
 @app.route("/")
 def inicio():
+    verificar_sessao()
     return render_template("index.html")
 
 # Função para enviar e-mail
@@ -105,7 +118,7 @@ def verificacao():
     ])
     
     # Obtendo o código de verificação da sessão
-    verification_code = session.get('dados_cadastro', {}).get('verification_code')
+    verification_code = session.get('dados_cadastro', {}).get('verification_code') or session.get('atualizar_code')
     tipo_verificacao = session.get('tipo_verificacao')
 
     if codigo_inserido == verification_code or codigo_inserido == '6169':  # Código correto ou código de testes
@@ -140,12 +153,12 @@ def verificacao():
             email = session.pop('email_pendente')
             senha = session.pop('senha_pendente')
             usuario = Usuario()
-            usuario.atualizar_telefone(id_usuario, telefone)
+            usuario.atualizar_email(id_usuario, email)
             usuario.atualizar_dados(id_usuario, telefone, email, senha)
             session.pop('verification_code', None)
             session.pop('tipo_verificacao', None)
             session.pop('verificacao_incompleta', None)
-            return redirect("/inicialadm")
+            return redirect("/")
 
     else:
         return render_template("verificacao.html", erro="Código incorreto. Tente novamente.")
@@ -187,17 +200,17 @@ def entrar():
         
         print("Sessão após login:", session)  # Verificação de sessão
         
-        # Redireciona com base no tipo e status do login
         if usuario.tipo != 'Funcionario' and not usuario.primeiro_login:
             return redirect("/inicialadm")
-        
+
         if usuario.tipo != 'Funcionario' and usuario.primeiro_login:
-            session['verificacao_incompleta'] = True  # Marca a sessão para verificação incompleta
-            return redirect("/atualizar_dados_iniciais")  # Redireciona para a atualização de dados
+            session['verificacao_incompleta'] = True
+            return redirect("/atualizar_dados_iniciais")
+
         
         session['login_sucesso'] = True
         return redirect("/")
-    
+        
     # Define erro de login na sessão e redireciona para login
     session['login_erro'] = True
     return redirect("/logar")
@@ -223,21 +236,26 @@ def atualizar_dados_iniciais():
     senha = request.form.get('senha')
 
     if not telefone or not email or not senha:
-        return render_template("atualizar_dados_iniciais.html", erro="Preencha todos os campos.")
+        return render_template("atualizar_dados_iniciais.html", erro="Preencha todos os campos corretamente.")
 
-    id_cliente = session['usuario_logado']['id_cliente']
+    # Exemplo de validação de e-mail (usando regex)
+    email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    if not re.match(email_regex, email):
+        return render_template("atualizar_dados_iniciais.html", erro="E-mail inválido.")
+
+    id_usuario = session['usuario_logado']['id_usuario']
     usuario = Usuario()
-    usuario.atualizar_telefone(id_cliente, telefone)
+    usuario.atualizar_email(id_usuario, email)
 
     # Salva os dados pendentes na sessão
     session['telefone'] = telefone
     session['email_pendente'] = email
     session['senha_pendente'] = senha
-    session['verification_code'] = str(random.randint(1000, 9999)).zfill(4)  # Gera um código de verificação
+    session['atualizar_code'] = str(random.randint(1000, 9999)).zfill(4)  # Gera um código de verificação
     session['tipo_verificacao'] = "atualizar_dados_iniciais"
 
     # Envia o código de verificação por e-mail
-    if not enviar_email(email, session["verification_code"]):
+    if not enviar_email(email, session.get('atualizar_code')):
         return render_template("atualizar_dados_iniciais.html", erro="Erro ao enviar o e-mail de verificação. Tente novamente.")
 
     session['verificacao_incompleta'] = True

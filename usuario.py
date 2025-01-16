@@ -112,3 +112,82 @@ class Usuario:
             # Fecha o cursor e a conexão para liberar recursos
             mycursor.close()
             mydb.close()
+
+    def atualizar_email(self, id_usuario, email):
+        """
+        Atualiza o email do usuario no banco de dados.
+
+        Parâmetros:
+        - id_usuario: ID do usuario que terá o telefone atualizado
+        - email: Novo email a ser salvo
+
+        Retorno:
+        - True se a atualização for bem-sucedida, False caso contrário
+        """
+        # Conectar ao banco de dados
+        mydb = Conexao.conectar()  
+        mycursor = mydb.cursor()
+
+        try:
+            # Comando SQL para atualizar o telefone
+            sql = "UPDATE tb_usuarios SET email = %s WHERE id_usuario = %s"
+            valores = (email, id_usuario)
+
+            # Executa a atualização
+            mycursor.execute(sql, valores)
+            mydb.commit()
+            print("Email atualizado com sucesso!")
+            return True
+        except Exception as e:
+            print("Erro ao atualizar o email:", e)
+            mydb.rollback()
+            return False
+        finally:
+            # Fecha o cursor e a conexão com o banco
+            mycursor.close()
+            mydb.close()
+
+    def atualizar_dados(self, id_cliente, telefone, email, senha):
+        """
+        Atualiza o telefone, email e senha do administrador e define 'primeiro_login' como False.
+        
+        Parâmetros:
+        - id_cliente: ID do cliente (administrador) a ser atualizado
+        - telefone: Novo número de telefone
+        - email: Novo email
+        - senha: Nova senha em texto puro que será criptografada para o banco de dados
+        
+        Retorno:
+        - True se a atualização for bem-sucedida, False caso contrário
+        """
+        # Hash da senha antes de armazenar no banco
+        hashed_password = sha256(senha.encode()).hexdigest()
+        
+        # Conecta ao banco de dados
+        mydb = Conexao.conectar()  
+        mycursor = mydb.cursor()
+
+        try:
+            # Query para atualizar os dados do administrador e marcar `primeiro_login` como `False`
+            sql = """
+                UPDATE tb_usuarios
+                SET telefone = %s, email = %s, senha = %s, primeiro_login = %s
+                WHERE id_usuario = %s
+            """
+            valores = (telefone, email, hashed_password, False, id_cliente)
+
+            # Executa a query
+            mycursor.execute(sql, valores)
+            mydb.commit()
+            
+            # Atualiza o atributo `primeiro_login` localmente
+            self.primeiro_login = False
+            return True
+        except Exception as e:
+            print("Erro ao atualizar dados do administrador:", e)
+            mydb.rollback()
+            return False
+        finally:
+            # Fecha o cursor e a conexão
+            mycursor.close()
+            mydb.close()
