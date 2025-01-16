@@ -178,7 +178,7 @@ def verificacao():
                 session.pop('tipo_verificacao', None)
                 session.pop('verificacao_incompleta', None)
 
-                return redirect("/")
+                return redirect("/produtos")
 
             except Exception as e:
                 # Limpa a sessão e redireciona ao login em caso de erro
@@ -235,7 +235,7 @@ def entrar():
         print("Sessão após login:", session)  # Verificação de sessão
         
         if usuario.tipo != 'Funcionario' and not usuario.primeiro_login:
-            return redirect("/inicialadm")
+            return redirect("/produtos")
 
         if usuario.tipo != 'Funcionario' and usuario.primeiro_login:
             session['verificacao_incompleta'] = True
@@ -243,7 +243,7 @@ def entrar():
 
         
         session['login_sucesso'] = True
-        return redirect("/")
+        return redirect("/produtos")
         
     # Define erro de login na sessão e redireciona para login
     session['login_erro'] = True
@@ -303,6 +303,10 @@ def sair():
     if request.method == 'GET':
         session.clear()  # Limpa a sessão
         return redirect("/")  # Redireciona para a página inicial
+    
+@app.route('/produtos')
+def produtos():
+    return render_template('produtos.html')
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8080)  # Define o host como localhost e a porta como 8080
