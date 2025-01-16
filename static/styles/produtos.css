@@ -1,8 +1,23 @@
-/* Reset básico */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+html{
+    overflow-x: hidden;
+}
+
+/* Estilização do cabeçalho */
+header {
+    background-color: #d4a373;
+    color: #fff;
+    padding: 2rem 1rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+header p {
+    font-size: 1.2rem;
 }
 
 body {
@@ -10,18 +25,6 @@ body {
     background-color: #f9f9f9;
     color: #333;
     line-height: 1.6;
-}
-
-/* Estilização do cabeçalho */
-header {
-    background-color: #d4a373;
-    color: #fff;
-    padding: 1.5rem 0;
-    text-align: center;
-}
-
-header h1 {
-    font-size: 2rem;
 }
 
 /* Container principal */
@@ -36,6 +39,7 @@ header h1 {
 
 /* Cartão de produto */
 .produto-card {
+    height: 6rem;
     background: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -48,12 +52,6 @@ header h1 {
 .produto-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-
-.produto-card img {
-    max-width: 100%;
-    border-radius: 8px;
-    margin-bottom: 1rem;
 }
 
 .produto-card h2 {

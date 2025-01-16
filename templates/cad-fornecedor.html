@@ -1,0 +1,26 @@
+{% extends "modelo.html" %}
+{% block conteudo %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+</style>
+<link rel="stylesheet" href="../static/styles/cad-fornecedor.css">
+    <main>
+        <div class="btn-voltar">
+            <button onclick="window.history.back()"><img
+                    src="https://www.svgrepo.com/show/324205/back-arrow-navigation.svg" alt=""></button>
+        </div>
+        
+        <form action="/inserir_fornecedor" method="post" enctype="multipart/form-data">
+            <div class="espacamento1"></div>
+            <h2>Adicione um fornecedor!</h2>
+            <input name="nome" type="text" id="nome" placeholder="Nome do fornecedor" required>
+            <input name="telefone" type="tel" id="telefone" placeholder="Telefone" oninput="formatPhone()" required>
+            <input name="email" type="email" id="email" placeholder="Email" required>
+            <input name="endereco" type="text" id="endereco" placeholder="Endereço" required>
+
+            <button type="submit" class="btn-Cadastrar">Adicionar</button>
+        </form>
+    </main>
+
+    <script src="../static/js/cad-fornecedor.js" defer></script>
+{% endblock %}

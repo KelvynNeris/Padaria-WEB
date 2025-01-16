@@ -1,0 +1,186 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+/* Barra de navegação */
+.navbar {
+    background-color: #d4a373;
+    padding: 0.8rem 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.navbar-logo {
+    font-size: 1.8rem;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.navbar-links {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+    transition: all 0.3s ease-in-out;
+}
+
+.navbar-links li {
+    display: inline-block;
+}
+
+.navbar-links a {
+    text-decoration: none;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: color 0.3s ease-in-out;
+}
+
+.navbar-links a:hover {
+    color: #ffd700;
+}
+
+/* Botão de login */
+.btn-login {
+    background-color: #fff;
+    color: #d4a373;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.btn-login:hover {
+    background-color: #ffd700;
+    color: #fff;
+}
+
+.menu-icon {
+    display: flex; /* Agora está visível por padrão */
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.menu-icon div {
+    width: 25px;
+    height: 3px;
+    background-color: #fff;
+    transition: 0.3s ease-in-out;
+}
+
+.menu-icon.change .bar1 {
+    transform: rotate(-45deg) translate(-5px, 5px);
+}
+
+.menu-icon.change .bar2 {
+    opacity: 0;
+}
+
+.menu-icon.change .bar3 {
+    transform: rotate(45deg) translate(-5px, -5px);
+}
+
+/* Responsividade */
+@media (min-width: 769px) {
+    .menu-icon {
+        display: none; /* Oculta o ícone em telas maiores */
+    }
+
+    .navbar-links {
+        flex-direction: row; /* Links em linha */
+        gap: 1.5rem;
+        height: auto; /* Exibe sempre os links */
+        position: static; /* Reseta a posição */
+        background-color: transparent; /* Sem fundo adicional */
+        box-shadow: none; /* Sem sombra */
+        overflow: visible; /* Links sempre visíveis */
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-logo {
+        font-size: 1rem;
+    }
+
+    .navbar-container {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .navbar-links {
+        flex-direction: column;
+        gap: 2rem;
+        width: 100%;
+        max-height: 0; /* Define altura inicial como 0 */
+        overflow: hidden;
+        background-color: #d4a373;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        padding: 0; /* Remove padding no estado inicial */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: max-height 0.5s ease, padding 0.3s ease; /* Transição suave para padding e altura */
+    }
+
+    .navbar-links.open {
+        max-height: 500px; /* Define um valor máximo suficiente para o menu expandido */
+        padding: 1rem 0; /* Adiciona padding ao abrir */
+    }
+
+    .navbar-links li {
+        text-align: center; /* Centraliza os itens */
+        padding: 0.5rem 1rem; /* Adiciona espaçamento interno aos itens */
+    }
+
+    .navbar-links a {
+        display: block; /* Garante que o link ocupe toda a área do item */
+        color: #fff;
+        font-size: 1.2rem;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .navbar-links a:hover {
+        color: #ffd700;
+    }
+}
+    
+/* Footer (opcional para maior consistência) */
+footer {
+    background-color: #d4a373;
+    color: #fff;
+    text-align: center;
+    padding: 1rem 0;
+    margin-top: 2rem;
+}
+
+footer a {
+    color: #ffd700;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}

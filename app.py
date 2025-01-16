@@ -308,5 +308,9 @@ def sair():
 def produtos():
     return render_template('produtos.html')
 
+@app.route('/inserir_fornecedores')
+def inserir_fornecedores():
+    return render_template('cad-fornecedor.html')
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8080)  # Define o host como localhost e a porta como 8080

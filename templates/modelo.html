@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos da Padaria</title>
+    <link rel="stylesheet" href="../static/styles/global.css">
+    <link rel="stylesheet" href="../static/styles/modelo.css">
+</head>
+
+<body>
+    <!-- Barra de navegação -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-logo">Padaria Doce Sabor</a>
+            <!-- Ícone do menu hambúrguer -->
+            <div class="menu-icon" onclick="toggleMenu(this)">
+                <div class="bar1"></div>
+                <div class="bar2"></div>
+                <div class="bar3"></div>
+            </div>
+            <ul class="navbar-links" id="menu">
+                <li><a href="/produtos">Produtos</a></li>
+                <li><a href="/sobre">Sobre</a></li>
+                <li><a href="/inserir_fornecedores">Fornecedores</a></li>
+                {% if not session.get('usuario_logado') %}
+                <li><a href="/entrar">Entrar</a></li>
+                {% endif %}
+                {% if session.get('usuario_logado') %}
+                <li><a href="/sair">Sair</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Conteúdo dinâmico -->
+    {% block conteudo %}
+    {% endblock %}
+    <script src="../static/js/modelo.js" defer></script>
+</body>
+
+</html>

@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produtos da Padaria</title>
-    <link rel="stylesheet" href="../static/styles/produtos.css">
-</head>
-
-<body>
+{% extends "modelo.html" %}
+{% block conteudo %}
+<link rel="stylesheet" href="../static/styles/produtos.css">
     <header>
         <h1>Produtos da Padaria</h1>
     </header>
@@ -20,6 +12,4 @@
             <p>Quantidade: 50 unidades</p>
         </div>
     </main>
-</body>
-
-</html>
+{% endblock %}
