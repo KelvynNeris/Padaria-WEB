@@ -106,9 +106,14 @@ def verificacao():
     if 'dados_cadastro' not in session and 'email_pendente' not in session:
         session.pop('usuario_logado', None)
         return redirect("/logar")
-
+    
     if request.method == 'GET':
-        return render_template("verificacao.html")
+        if session.get('tipo_verificacao') == 'cadastro':
+            email = session.get('dados_cadastro', {}).get('email')
+        else:
+            email = session.get('email_pendente')
+        
+        return render_template("verificacao.html", email=email)  # Passando o 'email' como argumento
 
     codigo_inserido = "".join([  # Obtendo o código inserido
         request.form["codigo1"],
@@ -148,17 +153,46 @@ def verificacao():
             return redirect("/")
 
         elif tipo_verificacao == "atualizar_dados_iniciais":
-            id_usuario = session['usuario_logado']['id_usuario']
-            telefone = session['telefone']
-            email = session.pop('email_pendente')
-            senha = session.pop('senha_pendente')
-            usuario = Usuario()
-            usuario.atualizar_email(id_usuario, email)
-            usuario.atualizar_dados(id_usuario, telefone, email, senha)
-            session.pop('verification_code', None)
-            session.pop('tipo_verificacao', None)
-            session.pop('verificacao_incompleta', None)
-            return redirect("/")
+            try:
+                id_usuario = session['usuario_logado']['id_usuario']
+                telefone = session['telefone']
+                email = session.pop('email_pendente', None)
+                senha = session.pop('senha_pendente', None)
+                
+                # Verifica se os dados obrigatórios estão presentes
+                if not all([id_usuario, telefone, email, senha]):
+                    raise ValueError("Dados incompletos para atualização.")
+                
+                usuario = Usuario()
+
+                # Atualiza o e-mail
+                if not usuario.atualizar_email(id_usuario, email):
+                    raise Exception("Erro ao atualizar o e-mail.")
+
+                # Atualiza os outros dados
+                if not usuario.atualizar_dados(id_usuario, telefone, email, senha):
+                    raise Exception("Erro ao atualizar os dados do usuário.")
+                
+                # Limpa a sessão após sucesso
+                session.pop('verification_code', None)
+                session.pop('tipo_verificacao', None)
+                session.pop('verificacao_incompleta', None)
+
+                return redirect("/")
+
+            except Exception as e:
+                # Limpa a sessão e redireciona ao login em caso de erro
+                print(f"Erro ao atualizar dados iniciais: {e}")
+                session.pop('usuario_logado', None)
+                session.pop('verification_code', None)
+                session.pop('tipo_verificacao', None)
+                session.pop('verificacao_incompleta', None)
+                session.pop('telefone', None)
+                session.pop('email_pendente', None)
+                session.pop('senha_pendente', None)
+                flash("Ocorreu um erro ao atualizar os dados. Faça login novamente.")
+                return redirect("/entrar")
+
 
     else:
         return render_template("verificacao.html", erro="Código incorreto. Tente novamente.")
@@ -215,9 +249,6 @@ def entrar():
     session['login_erro'] = True
     return redirect("/logar")
 
-
-
-
 @app.route("/atualizar_dados_iniciais", methods=["GET", "POST"])
 def atualizar_dados_iniciais():
     # Verifica se o usuário está logado e se a verificação está pendente
@@ -245,7 +276,12 @@ def atualizar_dados_iniciais():
 
     id_usuario = session['usuario_logado']['id_usuario']
     usuario = Usuario()
-    usuario.atualizar_email(id_usuario, email)
+    # Tenta atualizar o e-mail e verifica se houve sucesso
+    try:
+        if not usuario.atualizar_email(id_usuario, email):
+            raise Exception("Erro ao atualizar o e-mail. Certifique-se de que ele não está em uso.")
+    except Exception as e:
+        return render_template("atualizar_dados_iniciais.html", erro=str(e))
 
     # Salva os dados pendentes na sessão
     session['telefone'] = telefone
