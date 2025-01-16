@@ -10,7 +10,8 @@ CREATE TABLE tb_usuarios (
     senha VARCHAR(255) NOT NULL,
     telefone VARCHAR(15),  -- Adiciona o campo de telefone
     tipo_usuario ENUM('Administrador', 'Funcionario') NOT NULL,
-    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	primeiro_login BOOLEAN DEFAULT TRUE
 );
 
 -- Tabela de fornecedores
