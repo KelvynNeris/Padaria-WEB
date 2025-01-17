@@ -24,6 +24,9 @@
                 <li><a href="/produtos">Produtos</a></li>
                 <li><a href="/inserir_produto">Adicionar produto</a></li>
                 <li><a href="/inserir_fornecedor">Fornecedores</a></li>
+                {% if session.get('usuario_logado', {}).get('tipo') == 'Administrador' %}
+                <li><a href="/gerenciar_cadastros">Gerenciar cadastros</a></li>
+                {% endif %}
                 {% if not session.get('usuario_logado') %}
                 <li><a href="/entrar">Entrar</a></li>
                 {% endif %}

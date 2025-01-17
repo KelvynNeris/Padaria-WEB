@@ -1,0 +1,24 @@
+{% extends "modelo.html" %}
+{% block conteudo %}
+<link rel="stylesheet" href="../static/styles/gerenciar_cadastros.css">
+
+<header>
+    <h1>Gerenciar Pedidos de Cadastro</h1>
+</header>
+
+<main class="cadastros-container">
+    <h2>Solicitações Pendentes</h2>
+    <ul class="cadastro-lista">
+        {% for registro in usuarios %}
+        <li class="cadastro-item">
+            <p>Nome: <strong>{{ registro.nome }}</strong></p>
+            <p>Função: {{ registro.tipo }}</p>
+            <div class="botoes">
+                <button class="aceitar-btn" value="{{ registro.id_usuario }}">Aceitar</button>
+                <button class="recusar-btn" value="{{ registro.id_usuario }}">Recusar</button>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</main>
+{% endblock %}

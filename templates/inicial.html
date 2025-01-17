@@ -23,6 +23,12 @@
             <h2>Cadastro de Categorias</h2>
             <p>Cadastre novas categorias de produtos.</p>
         </a>
+        {% if session.get('usuario_logado', {}).get('tipo') == 'Administrador' %}
+        <a href="/gerenciar_cadastros" class="card">
+            <h2>Gerenciar Cadastros</h2>
+            <p>Gerencie o cadastro de novos funcionários.</p>
+        </a>
+        {% endif %}
         <a href="/produtos" class="card">
             <h2>Exibir Produtos</h2>
             <p>Veja a lista de produtos cadastrados.</p>

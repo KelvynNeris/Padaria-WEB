@@ -352,3 +352,70 @@ class Usuario:
 
         mydb.close()  # Fecha a conexão com o banco de dados
         return lista_produto
+    
+    def exibir_usuarios(self):
+        mydb = Conexao.conectar()  # Conecta ao banco de dados
+        mycursor = mydb.cursor()
+
+        sql = """
+            SELECT * FROM tb_usuarios
+        """
+        mycursor.execute(sql)
+
+        # Obtém os resultados e os organiza em uma lista
+        resultado = mycursor.fetchall()
+        lista_usuario = [
+            {
+                'id_usuario': usuario[0],
+                'nome': usuario[1],
+                'tipo': usuario[5]
+            }
+            for usuario in resultado
+        ]
+
+        mydb.close()  # Fecha a conexão com o banco de dados
+        return lista_usuario
+    
+    def deletar_usuario(self, id_usuario):
+        try:
+            mydb = Conexao.conectar()  # Conecta ao banco de dados
+            mycursor = mydb.cursor()
+
+            # Comando SQL para deletar
+            sql = "DELETE FROM tb_usuarios WHERE id_usuario = %s"
+            val = (id_usuario,)
+
+            mycursor.execute(sql, val)  # Executa o comando
+            mydb.commit()  # Salva as alterações
+
+            print(f"Usuário com ID {id_usuario} deletado com sucesso.")
+            return True
+        except Exception as e:
+            print(f"Erro ao deletar usuário: {e}")
+            return False
+        finally:
+            if mydb.is_connected():
+                mycursor.close()
+                mydb.close()
+    
+    def aceitar_usuario(self, id_usuario):
+        try:
+            mydb = Conexao.conectar()  # Conecta ao banco de dados
+            mycursor = mydb.cursor()
+
+            # Comando SQL para deletar
+            sql = f"UPDATE tb_usuarios SET primeiro_login = 0 WHERE id_usuario = %s"
+            val = (id_usuario,)
+
+            mycursor.execute(sql, val)  # Executa o comando
+            mydb.commit()  # Salva as alterações
+
+            print(f"Usuário com ID {id_usuario} aceitado com sucesso.")
+            return True
+        except Exception as e:
+            print(f"Erro ao aceitar usuário: {e}")
+            return False
+        finally:
+            if mydb.is_connected():
+                mycursor.close()
+                mydb.close()

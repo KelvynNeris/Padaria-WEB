@@ -24,7 +24,7 @@ def verificar_sessao():
         # Limpa a sessão de usuário e a flag de verificação incompleta
         session.pop('usuario_logado', None)
         session.pop('verificacao_incompleta', None)
-
+    
 @app.route("/")
 def inicio():
     verificar_sessao()
@@ -35,6 +35,8 @@ def inicio():
 @app.route("/principal")
 def princiapal():
     verificar_sessao()
+    if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
+        return render_template("aguardando_aprovacao.html")
     return render_template("inicial.html")
 
 
@@ -74,6 +76,8 @@ def enviar_email(destinatario, codigo_verificacao):
 # Rota de cadastro
 @app.route("/cadastrar_usuario", methods=["GET", "POST"])
 def cadastrar_usuario():
+    if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
+        return render_template("aguardando_aprovacao.html")
     if 'usuario_logado' in session:
         return redirect("/principal")
 
@@ -111,6 +115,8 @@ def cadastrar_usuario():
 
 @app.route("/verificacao", methods=["GET", "POST"])
 def verificacao():
+    if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
+        return render_template("aguardando_aprovacao.html")
     if 'dados_cadastro' not in session and 'email_pendente' not in session:
         session.pop('usuario_logado', None)
         return redirect("/logar")
@@ -153,7 +159,8 @@ def verificacao():
                         "email": usuario.email,
                         "tel": usuario.tel,
                         "id_usuario": usuario.id_usuario,
-                        "tipo": usuario.tipo
+                        "tipo": usuario.tipo,
+                        "primeiro_login": usuario.primeiro_login
                     }
             # Remover o código de verificação somente depois de cadastrar o usuário
             session.pop('verification_code', None)
@@ -259,6 +266,8 @@ def entrar():
 
 @app.route("/atualizar_dados_iniciais", methods=["GET", "POST"])
 def atualizar_dados_iniciais():
+    if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
+        return render_template("aguardando_aprovacao.html")
     # Verifica se o usuário está logado e se a verificação está pendente
     if 'usuario_logado' not in session:
         return redirect("/logar")
@@ -314,12 +323,16 @@ def sair():
   
 @app.route('/produtos')
 def produtos():
+    if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
+        return render_template("aguardando_aprovacao.html")
     usuario = Usuario()
     produtos = usuario.exibir_produtos()
     return render_template('produtos.html', produtos=produtos)
 
 @app.route('/inserir_fornecedor', methods=['GET', 'POST'])
 def inserir_fornecedor():
+    if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
+        return render_template("aguardando_aprovacao.html")
     if request.method == 'POST':
         # Obtém os dados do formulário
         email = request.form.get('email')
@@ -346,6 +359,8 @@ def inserir_fornecedor():
 
 @app.route('/inserir_produto', methods=['GET', 'POST'])
 def inserir_produto():
+    if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
+        return render_template("aguardando_aprovacao.html")
     usuario = Usuario()
     if request.method == 'POST':
         # Obtém os dados do formulário
@@ -375,6 +390,8 @@ def inserir_produto():
 
 @app.route('/inserir_categoria', methods=['GET', 'POST'])
 def inserir_categoria():
+    if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
+        return render_template("aguardando_aprovacao.html")
     if request.method == 'POST':
         # Obtém os dados do formulário
         descricao = request.form.get('descricao')
@@ -396,6 +413,18 @@ def inserir_categoria():
 
     # Exibe o formulário se for uma requisição GET
     return render_template('cad-categoria.html')
+
+@app.route("/gerenciar_cadastros", methods=['GET', 'POST'])
+def gerenciar_cadastros():
+    if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
+        return render_template("aguardando_aprovacao.html")
+    usuario = Usuario()
+    if request.method == 'POST':
+        deletar_usuario = request.form.get("recusar-btn")
+        aceitar_usuario = request.form.get("aceitar-btn")
+    
+    usuarios = usuario.exibir_usuarios()
+    return render_template("gerenciar_cadastros.html", usuarios=usuarios)
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8080)  # Define o host como localhost e a porta como 8080
