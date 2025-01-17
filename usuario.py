@@ -217,6 +217,31 @@ class Usuario:
                 mycursor.close()
                 mydb.close()
 
+    def inserir_categoria(self, descricao, nome):
+        try:
+            # Conecta ao banco de dados
+            mydb = Conexao.conectar()
+            mycursor = mydb.cursor()
+
+            # SQL para inserir os dados
+            sql = """
+                INSERT INTO tb_categorias (nome, descricao) VALUES (%s, %s)
+            """
+            val = (nome, descricao)
+
+            mycursor.execute(sql, val)  # Executa a query
+            mydb.commit()  # Salva as alterações
+
+            return True  # Retorna sucesso
+        except Exception as e:
+            print(f"Erro ao inserir categoria: {e}")
+            return False  # Retorna falha
+        finally:
+            # Fecha a conexão
+            if mydb.is_connected():
+                mycursor.close()
+                mydb.close()
+
     def inserir_produto(self, nome, descricao, estocado, categoria, fornecedor, preco):
         try:
             # Conecta ao banco de dados

@@ -28,7 +28,15 @@ def verificar_sessao():
 @app.route("/")
 def inicio():
     verificar_sessao()
+    if 'usuario_logado' in session:
+        return redirect("/principal")
     return render_template("index.html")
+
+@app.route("/principal")
+def princiapal():
+    verificar_sessao()
+    return render_template("inicial.html")
+
 
 # Função para enviar e-mail
 def enviar_email(destinatario, codigo_verificacao):
@@ -67,7 +75,7 @@ def enviar_email(destinatario, codigo_verificacao):
 @app.route("/cadastrar_usuario", methods=["GET", "POST"])
 def cadastrar_usuario():
     if 'usuario_logado' in session:
-        return redirect("/")
+        return redirect("/principal")
 
     if request.method == 'GET':
         usuario = Usuario()
@@ -150,7 +158,7 @@ def verificacao():
             # Remover o código de verificação somente depois de cadastrar o usuário
             session.pop('verification_code', None)
             session.pop('tipo_verificacao', None)
-            return redirect("/")
+            return redirect("/principal")
 
         elif tipo_verificacao == "atualizar_dados_iniciais":
             try:
@@ -178,7 +186,7 @@ def verificacao():
                 session.pop('tipo_verificacao', None)
                 session.pop('verificacao_incompleta', None)
 
-                return redirect("/produtos")
+                return redirect("/principal")
 
             except Exception as e:
                 # Limpa a sessão e redireciona ao login em caso de erro
@@ -205,9 +213,9 @@ def entrar():
             usuario = session['usuario_logado']
             # Redireciona conforme o tipo do usuário
             if usuario.get('tipo') == 'Administrador':
-                return redirect("/")
+                return redirect("/principal")
             else:
-                return redirect("/")
+                return redirect("/principal")
             
         
         # Renderiza a página de login para usuários não logados
@@ -235,7 +243,7 @@ def entrar():
         print("Sessão após login:", session)  # Verificação de sessão
         
         if usuario.tipo != 'Funcionario' and not usuario.primeiro_login:
-            return redirect("/produtos")
+            return redirect("/principal")
 
         if usuario.tipo != 'Funcionario' and usuario.primeiro_login:
             session['verificacao_incompleta'] = True
@@ -243,7 +251,7 @@ def entrar():
 
         
         session['login_sucesso'] = True
-        return redirect("/produtos")
+        return redirect("/principal")
         
     # Define erro de login na sessão e redireciona para login
     session['login_erro'] = True
@@ -303,7 +311,7 @@ def sair():
     if request.method == 'GET':
         session.clear()  # Limpa a sessão
         return redirect("/")  # Redireciona para a página inicial
-    
+  
 @app.route('/produtos')
 def produtos():
     usuario = Usuario()
@@ -365,6 +373,29 @@ def inserir_produto():
     fornecedores = usuario.exibir_fornecedor()
     return render_template('cad-produto.html', categorias=categorias, fornecedores=fornecedores)
 
+@app.route('/inserir_categoria', methods=['GET', 'POST'])
+def inserir_categoria():
+    if request.method == 'POST':
+        # Obtém os dados do formulário
+        descricao = request.form.get('descricao')
+        nome = request.form.get('nome')
+
+        # Valida os campos obrigatórios
+        if not (descricao and nome):
+            return "Todos os campos são obrigatórios!", 400
+
+        usuario = Usuario()
+
+        # Chama a função para inserir o fornecedor
+        sucesso = usuario.inserir_categoria(descricao, nome)
+
+        if sucesso:
+            return render_template('cad-fornecedor.html', mensagem="Fornecedor inserido com sucesso!")
+        else:
+            return "Erro ao inserir o fornecedor. Tente novamente.", 500
+
+    # Exibe o formulário se for uma requisição GET
+    return render_template('cad-categoria.html')
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8080)  # Define o host como localhost e a porta como 8080

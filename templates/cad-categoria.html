@@ -1,0 +1,22 @@
+{% extends "modelo.html" %}
+{% block conteudo %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+</style>
+<link rel="stylesheet" href="../static/styles/cad-categoria.css">
+    <main>
+        <div class="btn-voltar">
+            <button onclick="window.history.back()"><img
+                    src="https://www.svgrepo.com/show/324205/back-arrow-navigation.svg" alt=""></button>
+        </div>
+        
+        <form action="/inserir_categoria" method="post" enctype="multipart/form-data">
+            <div class="espacamento1"></div>
+            <h2>Adicione um fornecedor!</h2>
+            <input name="nome" type="text" id="nome" placeholder="Nome da categoria" required>
+            <input name="descricao" type="text" id="descricao" placeholder="Descrição" required>
+
+            <button type="submit" class="btn-Cadastrar">Adicionar</button>
+        </form>
+    </main>
+{% endblock %}
