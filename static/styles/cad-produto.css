@@ -1,0 +1,106 @@
+main {
+  display: flex;
+  justify-content: center;
+}
+
+form {
+  border-radius: 12px;
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+h2 {
+  margin-top: 1rem;
+  margin-bottom: 10px;
+  font-weight: bolder;
+  text-align: left;
+}
+
+input {
+  height: 25px;
+  padding: 26px;
+  border-radius: 5px;
+  border: 2px solid rgb(238, 238, 238);
+  background-color: rgb(245, 245, 245);
+  margin-top: 15px;
+  width: 100%;
+}
+
+input::placeholder {
+  color: #7e7d7d;
+}
+
+.btn-Cadastrar {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: rgb(161, 23, 23);
+  border-radius: 6px;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.btn-Cadastrar:active {
+  background-color: #004a92;
+}
+
+.btn-voltar img {
+  height: 20px;
+}
+
+.btn-voltar button {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  background-color: transparent;
+  border: 1px solid rgb(236, 236, 236);
+  width: 40px;
+  border-radius: 6px;
+  margin-top: 15px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  form {
+    width: 90%;
+  }
+}
+
+.espacamento1 {
+  height: 3rem;
+}
+
+select::-ms-expand {
+  display: none;
+  }
+  
+  select:after {
+  content: '<>';
+  font: 17px "Consolas", monospace;
+  color: #333;
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  transform: rotate(90deg);
+  right: 11px;
+  top: 18px;
+  padding: 0 0 2px;
+  border-bottom: 1px solid #999;
+  position: absolute;
+  pointer-events: none;
+  }
+  
+  select{
+    height: 60px;
+    width: 100%;
+    border: 2px solid rgb(238, 238, 238);
+    background-color: rgb(245, 245, 245);
+    margin-top: 15px;
+    border-radius: 5px;
+    padding-left: 23px;
+    color: #6e6e6e;
+  }

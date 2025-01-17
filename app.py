@@ -306,11 +306,65 @@ def sair():
     
 @app.route('/produtos')
 def produtos():
-    return render_template('produtos.html')
+    usuario = Usuario()
+    produtos = usuario.exibir_produtos()
+    return render_template('produtos.html', produtos=produtos)
 
-@app.route('/inserir_fornecedores')
-def inserir_fornecedores():
+@app.route('/inserir_fornecedor', methods=['GET', 'POST'])
+def inserir_fornecedor():
+    if request.method == 'POST':
+        # Obtém os dados do formulário
+        email = request.form.get('email')
+        telefone = request.form.get('telefone')
+        endereco = request.form.get('endereco')
+        nome = request.form.get('nome')
+
+        # Valida os campos obrigatórios
+        if not (email and telefone and endereco and nome):
+            return "Todos os campos são obrigatórios!", 400
+
+        usuario = Usuario()
+
+        # Chama a função para inserir o fornecedor
+        sucesso = usuario.inserir_fornecedor(email, telefone, endereco, nome)
+
+        if sucesso:
+            return render_template('cad-fornecedor.html', mensagem="Fornecedor inserido com sucesso!")
+        else:
+            return "Erro ao inserir o fornecedor. Tente novamente.", 500
+
+    # Exibe o formulário se for uma requisição GET
     return render_template('cad-fornecedor.html')
+
+@app.route('/inserir_produto', methods=['GET', 'POST'])
+def inserir_produto():
+    usuario = Usuario()
+    if request.method == 'POST':
+        # Obtém os dados do formulário
+        nome = request.form.get('nome')
+        descricao = request.form.get('descricao')
+        estocado = request.form.get('estocado')
+        categoria = request.form.get('categoria')
+        fornecedor = request.form.get('fornecedor')
+        preco = request.form.get('preco')
+
+        # Valida os campos obrigatórios
+        if not (estocado and descricao and categoria and nome and fornecedor and preco):
+            return "Todos os campos são obrigatórios!", 400
+
+        # Chama a função para inserir o fornecedor
+        sucesso = usuario.inserir_produto(nome, descricao, estocado, categoria, fornecedor, preco)
+
+        if sucesso:
+            categorias = usuario.exibir_categoria()
+            fornecedores = usuario.exibir_fornecedor()
+            return render_template('cad-produto.html', mensagem="Produto inserido com sucesso!", categorias=categorias, fornecedores=fornecedores)
+        else:
+            return "Erro ao inserir o produto. Tente novamente.", 500
+    categorias = usuario.exibir_categoria()
+    fornecedores = usuario.exibir_fornecedor()
+    return render_template('cad-produto.html', categorias=categorias, fornecedores=fornecedores)
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8080)  # Define o host como localhost e a porta como 8080

@@ -147,12 +147,12 @@ class Usuario:
             mycursor.close()
             mydb.close()
 
-    def atualizar_dados(self, id_cliente, telefone, email, senha):
+    def atualizar_dados(self, id_usuario, telefone, email, senha):
         """
         Atualiza o telefone, email e senha do administrador e define 'primeiro_login' como False.
         
         Parâmetros:
-        - id_cliente: ID do cliente (administrador) a ser atualizado
+        - id_usuario: ID do usuario (administrador) a ser atualizado
         - telefone: Novo número de telefone
         - email: Novo email
         - senha: Nova senha em texto puro que será criptografada para o banco de dados
@@ -174,7 +174,7 @@ class Usuario:
                 SET telefone = %s, email = %s, senha = %s, primeiro_login = %s
                 WHERE id_usuario = %s
             """
-            valores = (telefone, email, hashed_password, False, id_cliente)
+            valores = (telefone, email, hashed_password, False, id_usuario)
 
             # Executa a query
             mycursor.execute(sql, valores)
@@ -191,3 +191,139 @@ class Usuario:
             # Fecha o cursor e a conexão
             mycursor.close()
             mydb.close()
+
+    def inserir_fornecedor(self, email, telefone, endereco, nome):
+        try:
+            # Conecta ao banco de dados
+            mydb = Conexao.conectar()
+            mycursor = mydb.cursor()
+
+            # SQL para inserir os dados
+            sql = """
+                INSERT INTO tb_fornecedores (nome, telefone, email, endereco) VALUES (%s, %s, %s, %s)
+            """
+            val = (nome, telefone, email, endereco)
+
+            mycursor.execute(sql, val)  # Executa a query
+            mydb.commit()  # Salva as alterações
+
+            return True  # Retorna sucesso
+        except Exception as e:
+            print(f"Erro ao inserir fornecedor: {e}")
+            return False  # Retorna falha
+        finally:
+            # Fecha a conexão
+            if mydb.is_connected():
+                mycursor.close()
+                mydb.close()
+
+    def inserir_produto(self, nome, descricao, estocado, categoria, fornecedor, preco):
+        try:
+            # Conecta ao banco de dados
+            mydb = Conexao.conectar()
+            mycursor = mydb.cursor()
+
+            # SQL para inserir os dados
+            sql = """
+                INSERT INTO tb_produtos (nome, descricao, quantidade_estoque, id_categoria, id_fornecedor, preco) VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            val = (nome, descricao, estocado, categoria, fornecedor, preco)
+
+            mycursor.execute(sql, val)  # Executa a query
+            mydb.commit()  # Salva as alterações
+
+            return True  # Retorna sucesso
+        except Exception as e:
+            print(f"Erro ao inserir produto: {e}")
+            return False  # Retorna falha
+        finally:
+            # Fecha a conexão
+            if mydb.is_connected():
+                mycursor.close()
+                mydb.close()
+
+    def exibir_fornecedor(self):
+        # Conecta ao banco de dados
+        mydb = Conexao.conectar()
+        mycursor = mydb.cursor()
+
+        sql = """
+            SELECT * FROM tb_fornecedores
+        """
+
+        mycursor.execute(sql)
+
+        # Obtém os resultados e os organiza em uma lista
+        resultado = mycursor.fetchall()
+        lista_fornecedor = [{'id_fornecedor': fornecedor[0], 'nome': fornecedor[1]} for fornecedor in resultado]
+
+        mydb.close()
+        return lista_fornecedor
+    
+    def exibir_categoria(self):
+        """
+        Retorna uma lista com todas as categorias de produtos disponíveis, consultando a tabela `tb_categoria`.
+        Cada categoria contém o ID da categoria e o nome da categoria.
+        
+        Retorno:
+        - Uma lista de dicionários, onde cada dicionário representa uma categoria com 'id_categoria' e 'nome'.
+        """
+        mydb = Conexao.conectar()  # Conecta ao banco de dados
+        mycursor = mydb.cursor()
+
+        # Query SQL para selecionar todas as categorias
+        sql = "SELECT * from tb_categorias"
+        mycursor.execute(sql)
+
+        # Obtém os resultados e os organiza em uma lista
+        resultado = mycursor.fetchall()
+        lista_categoria = [{'id_categoria': categoria[0], 'nome': categoria[1]} for categoria in resultado]
+
+        mydb.commit()
+        mydb.close()
+        return lista_categoria
+
+    def exibir_produtos(self):
+        """
+        Retorna uma lista com todos os produtos, incluindo informações da categoria e do fornecedor,
+        consultando as tabelas `tb_produtos`, `tb_categorias` e `tb_fornecedores`.
+
+        Retorno:
+        - Uma lista de dicionários, onde cada dicionário representa um produto com seus detalhes.
+        """
+        mydb = Conexao.conectar()  # Conecta ao banco de dados
+        mycursor = mydb.cursor()
+
+        # Query SQL para obter os produtos com suas respectivas categorias e fornecedores
+        sql = """
+            SELECT 
+                p.id_produto,
+                p.nome AS nome_produto,
+                p.descricao,
+                p.quantidade_estoque,
+                p.preco,
+                c.nome AS nome_categoria,
+                f.nome AS nome_fornecedor
+            FROM tb_produtos p
+            INNER JOIN tb_categorias c ON p.id_categoria = c.id_categoria
+            INNER JOIN tb_fornecedores f ON p.id_fornecedor = f.id_fornecedor
+        """
+        mycursor.execute(sql)
+
+        # Obtém os resultados e os organiza em uma lista
+        resultado = mycursor.fetchall()
+        lista_produto = [
+            {
+                'id_produto': produto[0],
+                'nome_produto': produto[1],
+                'descricao': produto[2],
+                'quantidade_estoque': produto[3],
+                'preco': produto[4],
+                'nome_categoria': produto[5],
+                'nome_fornecedor': produto[6]
+            }
+            for produto in resultado
+        ]
+
+        mydb.close()  # Fecha a conexão com o banco de dados
+        return lista_produto

@@ -1,15 +1,24 @@
 {% extends "modelo.html" %}
 {% block conteudo %}
 <link rel="stylesheet" href="../static/styles/produtos.css">
-    <header>
-        <h1>Produtos da Padaria</h1>
-    </header>
+<header>
+    <h1>Produtos da Padaria</h1>
+</header>
 
-    <main class="produtos-container">
-        <!-- Produto exemplo -->
-        <div class="produto-card">
-            <h2>Pão Francês</h2>
-            <p>Quantidade: 50 unidades</p>
+<main class="produtos-container">
+    <!-- Produto exemplo -->
+    {% for registro in produtos %}
+    <div class="produto-card">
+        <div class="card-header">
+            <h2>{{ registro.nome_produto }}</h2>
+            <span class="preco">R$ {{ registro.preco }}</span>
         </div>
-    </main>
+        <div class="card-body">
+            <p><strong>Estoque:</strong> {{ registro.quantidade_estoque }} unidades</p>
+            <p><strong>Fornecedor:</strong> {{ registro.nome_fornecedor }}</p>
+            <p><strong>Categoria:</strong> {{ registro.nome_categoria }}</p>
+        </div>
+    </div>
+    {% endfor %}
+</main>
 {% endblock %}
