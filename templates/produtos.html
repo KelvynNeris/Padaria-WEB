@@ -14,11 +14,17 @@
             <span class="preco">R$ {{ registro.preco }}</span>
         </div>
         <div class="card-body">
-            <p><strong>Estoque:</strong> {{ registro.quantidade_estoque }} unidades</p>
+            <p><strong>Unidades:</strong> <span id="quantidade-{{ registro.id_produto }}">{{ registro.quantidade_estoque
+                    }}</span></p>
+            <input type="number" id="input-{{ registro.id_produto }}" placeholder="Insira a quantidade" min="1">
+            <button onclick="atualizarQuantidade('{{ registro.id_produto }}', 'retirar')">Retirar</button>
+            <button onclick="atualizarQuantidade('{{ registro.id_produto }}', 'colocar')">Colocar</button>
             <p><strong>Fornecedor:</strong> {{ registro.nome_fornecedor }}</p>
             <p><strong>Categoria:</strong> {{ registro.nome_categoria }}</p>
         </div>
     </div>
     {% endfor %}
+
 </main>
+<script src="../static/js/produtos.js" defer></script>
 {% endblock %}

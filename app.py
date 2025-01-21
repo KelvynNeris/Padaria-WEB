@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 import smtplib
 import os
 import random
@@ -35,8 +35,17 @@ def inicio():
 @app.route("/principal")
 def princiapal():
     verificar_sessao()
+     # Verifica se o usuário logado é um funcionário aguardando aprovação
     if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
-        return render_template("aguardando_aprovacao.html")
+        # Atualiza o estado da sessão dinamicamente
+        usuario = Usuario()
+        status_atual = usuario.verificar_status(session['usuario_logado']['id_usuario'])
+        if not status_atual['primeiro_login']:
+            session['usuario_logado']['primeiro_login'] = False  # Atualiza a sessão
+        else:
+            return render_template("aguardando_aprovacao.html")
+    if 'usuario_logado' not in session:
+        return redirect('/entrar')  # Redireciona para a página de login
     return render_template("inicial.html")
 
 
@@ -76,8 +85,15 @@ def enviar_email(destinatario, codigo_verificacao):
 # Rota de cadastro
 @app.route("/cadastrar_usuario", methods=["GET", "POST"])
 def cadastrar_usuario():
+    # Verifica se o usuário logado é um funcionário aguardando aprovação
     if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
-        return render_template("aguardando_aprovacao.html")
+        # Atualiza o estado da sessão dinamicamente
+        usuario = Usuario()
+        status_atual = usuario.verificar_status(session['usuario_logado']['id_usuario'])
+        if not status_atual['primeiro_login']:
+            session['usuario_logado']['primeiro_login'] = False  # Atualiza a sessão
+        else:
+            return render_template("aguardando_aprovacao.html")
     if 'usuario_logado' in session:
         return redirect("/principal")
 
@@ -115,8 +131,15 @@ def cadastrar_usuario():
 
 @app.route("/verificacao", methods=["GET", "POST"])
 def verificacao():
+    # Verifica se o usuário logado é um funcionário aguardando aprovação
     if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
-        return render_template("aguardando_aprovacao.html")
+        # Atualiza o estado da sessão dinamicamente
+        usuario = Usuario()
+        status_atual = usuario.verificar_status(session['usuario_logado']['id_usuario'])
+        if not status_atual['primeiro_login']:
+            session['usuario_logado']['primeiro_login'] = False  # Atualiza a sessão
+        else:
+            return render_template("aguardando_aprovacao.html")
     if 'dados_cadastro' not in session and 'email_pendente' not in session:
         session.pop('usuario_logado', None)
         return redirect("/logar")
@@ -266,8 +289,17 @@ def entrar():
 
 @app.route("/atualizar_dados_iniciais", methods=["GET", "POST"])
 def atualizar_dados_iniciais():
+    # Verifica se o usuário logado é um funcionário aguardando aprovação
     if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
-        return render_template("aguardando_aprovacao.html")
+        # Atualiza o estado da sessão dinamicamente
+        usuario = Usuario()
+        status_atual = usuario.verificar_status(session['usuario_logado']['id_usuario'])
+        if not status_atual['primeiro_login']:
+            session['usuario_logado']['primeiro_login'] = False  # Atualiza a sessão
+        else:
+            return render_template("aguardando_aprovacao.html")
+    if 'usuario_logado' not in session:
+        return redirect('/entrar')  # Redireciona para a página de login
     # Verifica se o usuário está logado e se a verificação está pendente
     if 'usuario_logado' not in session:
         return redirect("/logar")
@@ -323,16 +355,34 @@ def sair():
   
 @app.route('/produtos')
 def produtos():
+    # Verifica se o usuário logado é um funcionário aguardando aprovação
     if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
-        return render_template("aguardando_aprovacao.html")
+        # Atualiza o estado da sessão dinamicamente
+        usuario = Usuario()
+        status_atual = usuario.verificar_status(session['usuario_logado']['id_usuario'])
+        if not status_atual['primeiro_login']:
+            session['usuario_logado']['primeiro_login'] = False  # Atualiza a sessão
+        else:
+            return render_template("aguardando_aprovacao.html")
+    if 'usuario_logado' not in session:
+        return redirect('/entrar')  # Redireciona para a página de login
     usuario = Usuario()
     produtos = usuario.exibir_produtos()
     return render_template('produtos.html', produtos=produtos)
 
 @app.route('/inserir_fornecedor', methods=['GET', 'POST'])
 def inserir_fornecedor():
+    # Verifica se o usuário logado é um funcionário aguardando aprovação
     if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
-        return render_template("aguardando_aprovacao.html")
+        # Atualiza o estado da sessão dinamicamente
+        usuario = Usuario()
+        status_atual = usuario.verificar_status(session['usuario_logado']['id_usuario'])
+        if not status_atual['primeiro_login']:
+            session['usuario_logado']['primeiro_login'] = False  # Atualiza a sessão
+        else:
+            return render_template("aguardando_aprovacao.html")
+    if 'usuario_logado' not in session:
+        return redirect('/entrar')  # Redireciona para a página de login
     if request.method == 'POST':
         # Obtém os dados do formulário
         email = request.form.get('email')
@@ -359,8 +409,17 @@ def inserir_fornecedor():
 
 @app.route('/inserir_produto', methods=['GET', 'POST'])
 def inserir_produto():
+    # Verifica se o usuário logado é um funcionário aguardando aprovação
     if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
-        return render_template("aguardando_aprovacao.html")
+        # Atualiza o estado da sessão dinamicamente
+        usuario = Usuario()
+        status_atual = usuario.verificar_status(session['usuario_logado']['id_usuario'])
+        if not status_atual['primeiro_login']:
+            session['usuario_logado']['primeiro_login'] = False  # Atualiza a sessão
+        else:
+            return render_template("aguardando_aprovacao.html")
+    if 'usuario_logado' not in session:
+        return redirect('/entrar')  # Redireciona para a página de login
     usuario = Usuario()
     if request.method == 'POST':
         # Obtém os dados do formulário
@@ -390,8 +449,17 @@ def inserir_produto():
 
 @app.route('/inserir_categoria', methods=['GET', 'POST'])
 def inserir_categoria():
+    # Verifica se o usuário logado é um funcionário aguardando aprovação
     if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
-        return render_template("aguardando_aprovacao.html")
+        # Atualiza o estado da sessão dinamicamente
+        usuario = Usuario()
+        status_atual = usuario.verificar_status(session['usuario_logado']['id_usuario'])
+        if not status_atual['primeiro_login']:
+            session['usuario_logado']['primeiro_login'] = False  # Atualiza a sessão
+        else:
+            return render_template("aguardando_aprovacao.html")
+    if 'usuario_logado' not in session:
+        return redirect('/entrar')  # Redireciona para a página de login
     if request.method == 'POST':
         # Obtém os dados do formulário
         descricao = request.form.get('descricao')
@@ -416,15 +484,47 @@ def inserir_categoria():
 
 @app.route("/gerenciar_cadastros", methods=['GET', 'POST'])
 def gerenciar_cadastros():
-    if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
-        return render_template("aguardando_aprovacao.html")
-    usuario = Usuario()
-    if request.method == 'POST':
-        deletar_usuario = request.form.get("recusar-btn")
-        aceitar_usuario = request.form.get("aceitar-btn")
+    # Verifica se o usuário está logado
+    if 'usuario_logado' not in session:
+        return redirect('/entrar')  # Redireciona para a página de login
     
+    # Verifica se o usuário logado é um funcionário aguardando aprovação
+    if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
+        # Atualiza o estado da sessão dinamicamente
+        usuario = Usuario()
+        status_atual = usuario.verificar_status(session['usuario_logado']['id_usuario'])
+        if not status_atual['primeiro_login']:
+            session['usuario_logado']['primeiro_login'] = False  # Atualiza a sessão
+        else:
+            return render_template("aguardando_aprovacao.html")
+    
+    # Verifica se o usuário tem permissão para acessar a página
+    if session['usuario_logado']['tipo'] != 'Administrador':
+        return redirect('/dashboard')  # Redireciona para o painel principal
+    
+    usuario = Usuario()
+
+    # Lógica para processar ações de aceitar ou recusar usuários
+    if request.method == 'POST':
+        id_usuario = request.form.get("id_usuario")
+        acao = request.form.get("acao")
+
+        if id_usuario and acao:
+            if acao == "aceitar":
+                usuario.aceitar_usuario(id_usuario)
+            elif acao == "recusar":
+                usuario.deletar_usuario(id_usuario)
+            return redirect("/gerenciar_cadastros")
+    
+    # Exibe os usuários pendentes de aprovação
     usuarios = usuario.exibir_usuarios()
     return render_template("gerenciar_cadastros.html", usuarios=usuarios)
+
+@app.route('/atualizar_quantidade', methods=['POST'])
+def atualizar_quantidade():
+    data = request.get_json()
+    usuario = Usuario()
+    return usuario.processar_atualizacao_quantidade(data)
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8080)  # Define o host como localhost e a porta como 8080
