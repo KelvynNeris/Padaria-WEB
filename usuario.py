@@ -1,5 +1,6 @@
 from conexao import Conexao
 from hashlib import sha256
+from flask import jsonify
 
 class Usuario:
     
@@ -359,6 +360,7 @@ class Usuario:
 
         sql = """
             SELECT * FROM tb_usuarios
+            WHERE primeiro_login = 1
         """
         mycursor.execute(sql)
 
@@ -368,7 +370,7 @@ class Usuario:
             {
                 'id_usuario': usuario[0],
                 'nome': usuario[1],
-                'tipo': usuario[5]
+                'tipo': usuario[5],
             }
             for usuario in resultado
         ]
@@ -397,24 +399,82 @@ class Usuario:
             if mydb.is_connected():
                 mycursor.close()
                 mydb.close()
-    
+
     def aceitar_usuario(self, id_usuario):
         try:
             mydb = Conexao.conectar()  # Conecta ao banco de dados
             mycursor = mydb.cursor()
 
-            # Comando SQL para deletar
-            sql = f"UPDATE tb_usuarios SET primeiro_login = 0 WHERE id_usuario = %s"
+            # Comando SQL para alterar o estado de primeiro_login
+            sql = "UPDATE tb_usuarios SET primeiro_login = 0 WHERE id_usuario = %s"
             val = (id_usuario,)
 
             mycursor.execute(sql, val)  # Executa o comando
             mydb.commit()  # Salva as alterações
 
-            print(f"Usuário com ID {id_usuario} aceitado com sucesso.")
+            print(f"Usuário com ID {id_usuario} aceito com sucesso.")
             return True
         except Exception as e:
             print(f"Erro ao aceitar usuário: {e}")
             return False
+        finally:
+            if mydb.is_connected():
+                mycursor.close()
+                mydb.close()
+
+    # Método para verificar o status de aprovação
+    def verificar_status(self, id_usuario):
+        try:
+            mydb = Conexao.conectar()
+            mycursor = mydb.cursor()
+
+            sql = "SELECT primeiro_login FROM tb_usuarios WHERE id_usuario = %s"
+            mycursor.execute(sql, (id_usuario,))
+            resultado = mycursor.fetchone()
+
+            return {'primeiro_login': resultado[0]} if resultado else {'primeiro_login': True}
+
+        except Exception as e:
+            print(f"Erro ao verificar status: {e}")
+            return {'primeiro_login': True}
+        finally:
+            if mydb.is_connected():
+                mycursor.close()
+                mydb.close()
+
+    def processar_atualizacao_quantidade(self, data):
+        id_produto = data.get('id_produto')
+        quantidade = int(data.get('quantidade'))
+        acao = data.get('acao')
+
+        if not id_produto or not quantidade or not acao:
+            return jsonify({'success': False, 'error': 'Dados inválidos.'}), 400
+
+        try:
+            mydb = Conexao.conectar()
+            mycursor = mydb.cursor()
+
+            # Atualização no banco de dados
+            if acao == 'retirar':
+                sql = "UPDATE tb_produtos SET quantidade_estoque = quantidade_estoque - %s WHERE id_produto = %s"
+            elif acao == 'colocar':
+                sql = "UPDATE tb_produtos SET quantidade_estoque = quantidade_estoque + %s WHERE id_produto = %s"
+            else:
+                return jsonify({'success': False, 'error': 'Ação inválida.'}), 400
+
+            mycursor.execute(sql, (quantidade, id_produto))
+            mydb.commit()
+
+            # Obtém a nova quantidade
+            mycursor.execute("SELECT quantidade_estoque FROM tb_produtos WHERE id_produto = %s", (id_produto,))
+            nova_quantidade = mycursor.fetchone()[0]
+
+            return jsonify({'success': True, 'nova_quantidade': nova_quantidade})
+
+        except Exception as e:
+            print(f"Erro ao atualizar a quantidade: {e}")
+            return jsonify({'success': False, 'error': 'Erro no servidor.'}), 500
+
         finally:
             if mydb.is_connected():
                 mycursor.close()

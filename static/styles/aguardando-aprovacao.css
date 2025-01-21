@@ -48,7 +48,7 @@ header {
     height: 100%;
 }
 
-/* Card de mensagem */
+/* Card sem animação */
 .card {
     background: #fff;
     border-radius: 12px;
@@ -56,6 +56,10 @@ header {
     max-width: 400px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     text-align: center;
+}
+
+/* Animação inicial */
+.card.animate {
     animation: fadeIn 1s ease-in-out;
 }
 
@@ -95,6 +99,7 @@ header {
     }
 }
 
+/* Animações */
 @keyframes fadeIn {
     0% {
         opacity: 0;

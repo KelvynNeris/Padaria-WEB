@@ -13,10 +13,11 @@
         <li class="cadastro-item">
             <p>Nome: <strong>{{ registro.nome }}</strong></p>
             <p>Função: {{ registro.tipo }}</p>
-            <div class="botoes">
-                <button class="aceitar-btn" value="{{ registro.id_usuario }}">Aceitar</button>
-                <button class="recusar-btn" value="{{ registro.id_usuario }}">Recusar</button>
-            </div>
+            <form action="/gerenciar_cadastros" class="botoes" method="post">
+                <input type="hidden" name="id_usuario" value="{{ registro.id_usuario }}">
+                <button type="submit" name="acao" value="aceitar" class="aceitar-btn">Aceitar</button>
+                <button type="submit" name="acao" value="recusar" class="recusar-btn">Recusar</button>
+            </form>
         </li>
         {% endfor %}
     </ul>
