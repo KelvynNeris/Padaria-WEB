@@ -1,6 +1,7 @@
 {% extends "modelo.html" %}
 {% block conteudo %}
 <link rel="stylesheet" href="../static/styles/produtos.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=delete" />
 <header>
     <h1>Produtos da Padaria</h1>
 </header>
@@ -14,17 +15,32 @@
             <span class="preco">R$ {{ registro.preco }}</span>
         </div>
         <div class="card-body">
-            <p><strong>Unidades:</strong> <span id="quantidade-{{ registro.id_produto }}">{{ registro.quantidade_estoque
-                    }}</span></p>
+            <span class="delete-icon material-symbols-outlined" onclick="abrirModalConfirmacao('{{ registro.id_produto }}')" title="Remover produto">
+                delete
+            </span>            
+            <p><strong>Unidades:</strong> <span id="quantidade-{{ registro.id_produto }}">{{ registro.quantidade_estoque }}</span></p>
             <input type="number" id="input-{{ registro.id_produto }}" placeholder="Insira a quantidade" min="1">
             <button onclick="atualizarQuantidade('{{ registro.id_produto }}', 'retirar')">Retirar</button>
             <button onclick="atualizarQuantidade('{{ registro.id_produto }}', 'colocar')">Colocar</button>
             <p><strong>Fornecedor:</strong> {{ registro.nome_fornecedor }}</p>
             <p><strong>Categoria:</strong> {{ registro.nome_categoria }}</p>
         </div>
-    </div>
+    </div>    
     {% endfor %}
 
 </main>
 <script src="../static/js/produtos.js" defer></script>
+
+
+<div id="modal-confirmacao" class="modal">
+    <div class="modal-content">
+        <span class="fechar-modal" onclick="fecharModal()">&times;</span>
+        <h2>Confirmar Remoção</h2>
+        <p>Tem certeza de que deseja remover este produto?</p>
+        <div class="botoes">
+            <button id="confirmar-remocao" class="btn-confirmar">Confirmar</button>
+            <button onclick="fecharModal()" class="btn-cancelar">Cancelar</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
