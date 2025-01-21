@@ -1,0 +1,28 @@
+{% extends "modelo.html" %}
+{% block conteudo %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+</style>
+<link rel="stylesheet" href="../static/styles/cad-cliente-fiado.css">
+
+<main>
+    <div class="btn-voltar">
+        <button onclick="window.history.back()">
+            <img src="https://www.svgrepo.com/show/324205/back-arrow-navigation.svg" alt="Voltar">
+        </button>
+    </div>
+
+    <form id="form-cadastro" action="/inserir_cliente_fiado" method="post" enctype="multipart/form-data">
+        <div class="espacamento1"></div>
+        <h2>Cadastre o fiador!</h2>
+        <input name="nome" type="text" id="nome" placeholder="Nome do fiador" required>
+        <input name="email" type="email" id="email" placeholder="Email" required>
+        <input name="telefone" type="text" id="telefone" oninput="formatPhone()" placeholder="Telefone" required>
+        <input name="endereco" type="text" id="endereco" placeholder="Endereço" required>
+
+        <button type="submit" class="btn-Cadastrar">Adicionar</button>
+    </form>
+</main>
+
+<script src="../static/js/cad_cliente_fiado.js" defer></script>
+{% endblock %}

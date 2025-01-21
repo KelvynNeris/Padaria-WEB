@@ -243,6 +243,31 @@ class Usuario:
                 mycursor.close()
                 mydb.close()
 
+    def inserir_cliente_fiado(self, telefone, nome, email, endereco):
+        try:
+            # Conecta ao banco de dados
+            mydb = Conexao.conectar()
+            mycursor = mydb.cursor()
+
+            # SQL para inserir os dados
+            sql = """
+                INSERT INTO tb_clientes_fiado (telefone, nome, email, endereco) VALUES (%s, %s, %s, %s)
+            """
+            val = (telefone, nome, email, endereco)
+
+            mycursor.execute(sql, val)  # Executa a query
+            mydb.commit()  # Salva as alterações
+
+            return True  # Retorna sucesso
+        except Exception as e:
+            print(f"Erro ao inserir cliente: {e}")
+            return False  # Retorna falha
+        finally:
+            # Fecha a conexão
+            if mydb.is_connected():
+                mycursor.close()
+                mydb.close()
+
     def inserir_produto(self, nome, descricao, estocado, categoria, fornecedor, preco):
         try:
             # Conecta ao banco de dados
@@ -333,6 +358,7 @@ class Usuario:
             FROM tb_produtos p
             INNER JOIN tb_categorias c ON p.id_categoria = c.id_categoria
             INNER JOIN tb_fornecedores f ON p.id_fornecedor = f.id_fornecedor
+            WHERE p.ativo = 1
         """
         mycursor.execute(sql)
 
@@ -474,6 +500,27 @@ class Usuario:
         except Exception as e:
             print(f"Erro ao atualizar a quantidade: {e}")
             return jsonify({'success': False, 'error': 'Erro no servidor.'}), 500
+
+        finally:
+            if mydb.is_connected():
+                mycursor.close()
+                mydb.close()
+
+    def remover_produto(id_produto):
+        try:
+            mydb = Conexao.conectar()
+            mycursor = mydb.cursor()
+
+            # Atualiza o status do produto para inativo
+            sql = "UPDATE tb_produtos SET ativo = FALSE WHERE id_produto = %s"
+            mycursor.execute(sql, (id_produto,))
+            mydb.commit()
+
+            return jsonify({'success': True, 'message': 'Produto removido com sucesso.'})
+
+        except Exception as e:
+            print(f"Erro ao remover produto: {e}")
+            return jsonify({'success': False, 'error': 'Erro ao remover produto.'}), 500
 
         finally:
             if mydb.is_connected():

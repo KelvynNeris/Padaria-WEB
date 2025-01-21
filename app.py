@@ -482,6 +482,42 @@ def inserir_categoria():
     # Exibe o formulário se for uma requisição GET
     return render_template('cad-categoria.html')
 
+@app.route('/inserir_cliente_fiado', methods=['GET', 'POST'])
+def inserir_cliente_fiado():
+     # Verifica se o usuário logado é um funcionário aguardando aprovação
+    if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
+        # Atualiza o estado da sessão dinamicamente
+        usuario = Usuario()
+        status_atual = usuario.verificar_status(session['usuario_logado']['id_usuario'])
+        if not status_atual['primeiro_login']:
+            session['usuario_logado']['primeiro_login'] = False  # Atualiza a sessão
+        else:
+            return render_template("aguardando_aprovacao.html")
+    if 'usuario_logado' not in session:
+        return redirect('/entrar')  # Redireciona para a página de login
+    
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        telefone = request.form.get('telefone')
+        endereco = request.form.get('endereco')
+        email = request.form.get('email')
+        # Valida os campos obrigatórios
+
+        if not (telefone and endereco and email and nome):
+            return "Todos os campos são obrigatórios!", 400
+
+        usuario = Usuario()
+
+        # Chama a função para inserir o fornecedor
+        sucesso = usuario.inserir_cliente_fiado(telefone, nome, email, endereco)
+
+        if sucesso:
+            return render_template('cad-cliente-fiado.html', mensagem="Cliente inserido com sucesso!")
+        else:
+            return "Erro ao inserir o fornecedor. Tente novamente.", 500
+    # Exibe o formulário se for uma requisição GET
+    return render_template('cad-cliente-fiado.html')
+
 @app.route("/gerenciar_cadastros", methods=['GET', 'POST'])
 def gerenciar_cadastros():
     # Verifica se o usuário está logado
@@ -525,6 +561,15 @@ def atualizar_quantidade():
     data = request.get_json()
     usuario = Usuario()
     return usuario.processar_atualizacao_quantidade(data)
+
+# Rota para remover produto
+@app.route('/remover_produto/<int:id_produto>', methods=['POST'])
+def remover_produto(id_produto):
+    return Usuario.remover_produto(id_produto)
+
+@app.route('/compra', methods=['GET', 'POST'])
+def compra():
+    return render_template("compra.html")
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8080)  # Define o host como localhost e a porta como 8080
