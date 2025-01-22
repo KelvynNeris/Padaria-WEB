@@ -569,7 +569,10 @@ def remover_produto(id_produto):
 
 @app.route('/compra', methods=['GET', 'POST'])
 def compra():
-    return render_template("compra.html")
+    usuario = Usuario()
+    if request.method == 'GET':
+        lista_select_produtos = usuario.exibir_select_produtos()
+        return render_template("compra.html", lista_select_produtos=lista_select_produtos)
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8080)  # Define o host como localhost e a porta como 8080

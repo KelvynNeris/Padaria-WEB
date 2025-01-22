@@ -1,39 +1,42 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const tabelaProdutos = document.getElementById("tabela-produtos").querySelector("tbody");
-    const totalCompraEl = document.getElementById("total-compra");
+$(document).ready(() => {
+    // Inicializar Select2 no campo de produtos
+    $('#produto').select2({
+        placeholder: "Pesquise ou selecione um produto",
+        allowClear: true,
+        width: '100%'
+    });
+
+    const tabelaProdutos = $("#tabela-produtos tbody");
+    const totalCompraEl = $("#total-compra");
     let totalCompra = 0;
 
-    // Função para mostrar ou esconder o campo de nome do cliente
     const toggleNomeClienteField = () => {
-        const tipoPagamentoSelect = document.getElementById("tipo-pagamento");
-        const nomeClienteSection = document.querySelector(".nome-cliente-section");
-        const nomeClienteInput = document.getElementById("nome-cliente");
+        const tipoPagamentoSelect = $("#tipo-pagamento").val();
+        const nomeClienteSection = $(".nome-cliente-section");
+        const nomeClienteInput = $("#nome-cliente");
 
-        if (tipoPagamentoSelect.value === "fiado") {
-            nomeClienteSection.style.display = "block";
-            nomeClienteInput.setAttribute("required", "required");
+        if (tipoPagamentoSelect === "fiado") {
+            nomeClienteSection.show();
+            nomeClienteInput.attr("required", "required");
         } else {
-            nomeClienteSection.style.display = "none";
-            nomeClienteInput.removeAttribute("required");
+            nomeClienteSection.hide();
+            nomeClienteInput.removeAttr("required");
         }
     };
 
-    // Monitorar mudanças no tipo de pagamento
-    document.getElementById("tipo-pagamento").addEventListener("change", toggleNomeClienteField);
-
-    // Iniciar com a configuração correta
+    $("#tipo-pagamento").on("change", toggleNomeClienteField);
     toggleNomeClienteField();
 
-    document.getElementById("adicionar-produto").addEventListener("click", () => {
-        const produtoSelect = document.getElementById("produto");
-        const quantidadeInput = document.getElementById("quantidade");
+    $("#adicionar-produto").on("click", () => {
+        const produtoSelect = $("#produto");
+        const quantidadeInput = $("#quantidade");
 
-        const produtoId = produtoSelect.value;
-        const produtoNome = produtoSelect.options[produtoSelect.selectedIndex].text;
-        const precoUnitario = parseFloat(produtoSelect.options[produtoSelect.selectedIndex].dataset.preco);
-        const quantidade = parseInt(quantidadeInput.value);
+        const produtoId = produtoSelect.val();
+        const produtoNome = produtoSelect.find(":selected").text();
+        const precoUnitario = parseFloat(produtoSelect.find(":selected").data("preco") || 0);
+        const quantidade = parseInt(quantidadeInput.val());
 
-        if (!produtoId || !quantidade || quantidade <= 0) {
+        if (!produtoId || isNaN(quantidade) || quantidade <= 0) {
             alert("Selecione um produto e insira uma quantidade válida.");
             return;
         }
@@ -41,36 +44,33 @@ document.addEventListener("DOMContentLoaded", () => {
         const precoTotal = precoUnitario * quantidade;
         totalCompra += precoTotal;
 
-        // Adiciona o produto na tabela
-        const novaLinha = document.createElement("tr");
-        novaLinha.innerHTML = `
-            <td>${produtoNome}</td>
-            <td>${quantidade}</td>
-            <td>R$ ${precoUnitario.toFixed(2)}</td>
-            <td>R$ ${precoTotal.toFixed(2)}</td>
-            <td><button type="button" class="remover-produto">Remover</button></td>
-        `;
-        tabelaProdutos.appendChild(novaLinha);
+        const novaLinha = $(`
+            <tr>
+                <td>${produtoNome}</td>
+                <td>${quantidade}</td>
+                <td>R$ ${precoUnitario.toFixed(2)}</td>
+                <td>R$ ${precoTotal.toFixed(2)}</td>
+                <td><button type="button" class="remover-produto">Remover</button></td>
+            </tr>
+        `);
 
-        totalCompraEl.textContent = totalCompra.toFixed(2);
+        tabelaProdutos.append(novaLinha);
+        totalCompraEl.text(totalCompra.toFixed(2));
 
-        // Limpa os campos
-        produtoSelect.value = "";
-        quantidadeInput.value = "";
+        produtoSelect.val("").trigger("change");
+        quantidadeInput.val("");
 
-        // Remove produto
-        novaLinha.querySelector(".remover-produto").addEventListener("click", () => {
+        novaLinha.find(".remover-produto").on("click", () => {
             totalCompra -= precoTotal;
-            totalCompraEl.textContent = totalCompra.toFixed(2);
-            tabelaProdutos.removeChild(novaLinha);
+            totalCompraEl.text(totalCompra.toFixed(2));
+            novaLinha.remove();
         });
     });
 
-    // Finalizar Compra
-    document.getElementById("form-compra").addEventListener("submit", (e) => {
+    $("#form-compra").on("submit", (e) => {
         e.preventDefault();
-        const tipoPagamento = document.getElementById("tipo-pagamento").value;
-        const nomeCliente = document.getElementById("nome-cliente").value;
+        const tipoPagamento = $("#tipo-pagamento").val();
+        const nomeCliente = $("#nome-cliente").val();
 
         if (!tipoPagamento) {
             alert("Selecione o tipo de pagamento.");
@@ -83,6 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         alert("Compra registrada com sucesso!");
-        // Aqui você pode enviar os dados para o backend via fetch
+        // Aqui você pode enviar os dados para o backend via fetch ou AJAX
     });
 });

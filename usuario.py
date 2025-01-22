@@ -526,3 +526,27 @@ class Usuario:
             if mydb.is_connected():
                 mycursor.close()
                 mydb.close()
+
+    def exibir_select_produtos(self):
+        mydb = Conexao.conectar()  # Conecta ao banco de dados
+        mycursor = mydb.cursor()
+
+        sql = """
+            SELECT * FROM tb_produtos
+            WHERE ativo = 1
+        """
+        mycursor.execute(sql)
+
+        # Obtém os resultados e os organiza em uma lista
+        resultado = mycursor.fetchall()
+        lista_select_produtos = [
+            {
+                'id_produto': select_produtos[0],
+                'nome': select_produtos[1],
+                'preco': select_produtos[4],
+            }
+            for select_produtos in resultado
+        ]
+
+        mydb.close()  # Fecha a conexão com o banco de dados
+        return lista_select_produtos

@@ -1,7 +1,19 @@
 {% extends "modelo.html" %}
 {% block conteudo %}
+<!-- CSS do Select2 -->
+<!-- Carregar jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
+<!-- Carregar Select2 -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js"></script>
+
 <link rel="stylesheet" href="../static/styles/compra.css">
-<script defer src="../static/js/compra.js"></script>
+
+<!-- Seu script -->
+<script src="../static/js/compra.js" defer></script>
+
+
 <header>
     <h1>Registrar Compra</h1>
 </header>
@@ -18,12 +30,12 @@
             <h2>Produtos</h2>
             <div class="produto-adicionar">
                 <label for="produto">Produto:</label>
-                <select id="produto" name="produto">
-                    <option value="" disabled selected>Selecione o produto</option>
-                    <option value="1" data-preco="5.00">Pão - R$ 5,00</option>
-                    <option value="2" data-preco="3.50">Bolo - R$ 3,50</option>
-                    <option value="3" data-preco="8.00">Torta - R$ 8,00</option>
-                </select>
+                <select id="produto" name="produto" style="width: 100%;">
+                    <option value="" disabled selected>Pesquise ou selecione um produto</option>
+                    {% for registro in lista_select_produtos %}
+                    <option value="{{ registro.id_produto }}" data-preco="{{ registro.preco }}">{{ registro.nome }} - R$ {{ registro.preco }}</option>
+                    {% endfor %}
+                </select>                
                 <label for="quantidade">Quantidade:</label>
                 <input type="number" id="quantidade" name="quantidade" min="1" placeholder="0">
                 <button type="button" id="adicionar-produto">Adicionar</button>
