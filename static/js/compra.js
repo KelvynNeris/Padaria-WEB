@@ -1,7 +1,7 @@
 $(document).ready(() => {
-    // Inicializar Select2 no campo de produtos
-    $('#produto').select2({
-        placeholder: "Pesquise ou selecione um produto",
+    // Inicializar Select2 nos campos
+    $('#produto, #cliente').select2({
+        placeholder: "Pesquise ou selecione",
         allowClear: true,
         width: '100%'
     });
@@ -10,34 +10,70 @@ $(document).ready(() => {
     const totalCompraEl = $("#total-compra");
     let totalCompra = 0;
 
-    const toggleNomeClienteField = () => {
-        const tipoPagamentoSelect = $("#tipo-pagamento").val();
-        const nomeClienteSection = $(".nome-cliente-section");
-        const nomeClienteInput = $("#nome-cliente");
+    const atualizarTotalCompra = () => {
+        totalCompraEl.text(totalCompra.toFixed(2));
+    };
 
-        if (tipoPagamentoSelect === "fiado") {
-            nomeClienteSection.show();
-            nomeClienteInput.attr("required", "required");
+    // Atualizar o campo de quantidade baseado no tipo de produto
+    const atualizarCamposQuantidade = () => {
+        const produtoSelect = $("#produto");
+        const vendidoKilo = produtoSelect.find(":selected").data("vendido-kilo");
+
+        const quantidadeContainer = $("#quantidade-container");
+        quantidadeContainer.empty(); // Limpar campos de quantidade anteriores
+
+        if (vendidoKilo == 1) {
+            // Se for vendido por quilo, adicionar campos para gramas e quilos
+            quantidadeContainer.append(`
+                <label for="quantidade-quilos">Quantidade (Kg):</label>
+                <input type="number" id="quantidade-quilos" name="quantidade-quilos" min="0.01" step="0.01" placeholder="Kg">
+                <label for="quantidade-gramas">Quantidade (g):</label>
+                <input type="number" id="quantidade-gramas" name="quantidade-gramas" min="1" placeholder="g">
+            `);
         } else {
-            nomeClienteSection.hide();
-            nomeClienteInput.removeAttr("required");
+            // Caso contrário, manter o input atual de quantidade por unidade
+            quantidadeContainer.append(`
+                <input type="number" id="quantidade" name="quantidade" min="1" placeholder="0">
+            `);
         }
     };
 
-    $("#tipo-pagamento").on("change", toggleNomeClienteField);
-    toggleNomeClienteField();
+    // Alterar a quantidade de campos ao escolher o produto
+    $("#produto").on("change", atualizarCamposQuantidade);
 
+    // Função para adicionar o produto na tabela
     $("#adicionar-produto").on("click", () => {
         const produtoSelect = $("#produto");
         const quantidadeInput = $("#quantidade");
+        const quantidadeQuilosInput = $("#quantidade-quilos");
+        const quantidadeGramasInput = $("#quantidade-gramas");
 
         const produtoId = produtoSelect.val();
         const produtoNome = produtoSelect.find(":selected").text();
-        const precoUnitario = parseFloat(produtoSelect.find(":selected").data("preco") || 0);
-        const quantidade = parseInt(quantidadeInput.val());
+        const precoUnitario = parseFloat(produtoSelect.find(":selected").data("vendido-kilo") == 1 ?
+            produtoSelect.find(":selected").data("preco-kilo") :
+            produtoSelect.find(":selected").data("preco"));
+
+        let quantidade = 0;
+
+        // Se for vendido por quilo, somar as quantidades de gramas e quilos
+        if (produtoSelect.find(":selected").data("vendido-kilo") == 1) {
+            const quantidadeQuilos = parseFloat(quantidadeQuilosInput.val()) || 0;
+            const quantidadeGramas = parseInt(quantidadeGramasInput.val()) || 0;
+            quantidade = quantidadeQuilos + (quantidadeGramas / 1000); // Convertendo gramas para quilos
+        } else {
+            quantidade = parseInt(quantidadeInput.val());
+        }
 
         if (!produtoId || isNaN(quantidade) || quantidade <= 0) {
             alert("Selecione um produto e insira uma quantidade válida.");
+            return;
+        }
+
+        // Verificar duplicação de produto
+        const linhaExistente = tabelaProdutos.find(`tr[data-id="${produtoId}"]`);
+        if (linhaExistente.length > 0) {
+            alert("Produto já adicionado. Edite a quantidade diretamente na lista.");
             return;
         }
 
@@ -45,32 +81,52 @@ $(document).ready(() => {
         totalCompra += precoTotal;
 
         const novaLinha = $(`
-            <tr>
+            <tr data-id="${produtoId}">
                 <td>${produtoNome}</td>
-                <td>${quantidade}</td>
-                <td>R$ ${precoUnitario.toFixed(2)}</td>
-                <td>R$ ${precoTotal.toFixed(2)}</td>
+                <td><input type="number" class="quantidade-editar" value="${quantidade}" min="1"></td>
+                <td>R$ ${precoUnitario.toFixed(2)} Kg</td>
+                <td class="preco-total">R$ ${precoTotal.toFixed(2)}</td>
                 <td><button type="button" class="remover-produto">Remover</button></td>
             </tr>
         `);
 
         tabelaProdutos.append(novaLinha);
-        totalCompraEl.text(totalCompra.toFixed(2));
+        atualizarTotalCompra();
 
+        // Resetar campos
         produtoSelect.val("").trigger("change");
         quantidadeInput.val("");
+        quantidadeQuilosInput.val("");
+        quantidadeGramasInput.val("");
 
         novaLinha.find(".remover-produto").on("click", () => {
             totalCompra -= precoTotal;
-            totalCompraEl.text(totalCompra.toFixed(2));
+            atualizarTotalCompra();
             novaLinha.remove();
+        });
+
+        // Atualizar total ao editar a quantidade
+        novaLinha.find(".quantidade-editar").on("input", () => {
+            const novaQuantidade = parseFloat(novaLinha.find(".quantidade-editar").val());
+            const novoPrecoTotal = precoUnitario * novaQuantidade;
+            novaLinha.find(".preco-total").text(`R$ ${novoPrecoTotal.toFixed(2)}`);
+            totalCompra = 0;
+            tabelaProdutos.find("tr").each((_, row) => {
+                const rowEl = $(row);
+                const preco = parseFloat(rowEl.find(".preco-total").text().replace("R$ ", ""));
+                totalCompra += preco;
+            });
+            atualizarTotalCompra();
         });
     });
 
-    $("#form-compra").on("submit", (e) => {
+    // Atualizar campos ao carregar a página, se necessário
+    atualizarCamposQuantidade();
+
+    $("#form-compra").on("submit", async (e) => {
         e.preventDefault();
         const tipoPagamento = $("#tipo-pagamento").val();
-        const nomeCliente = $("#nome-cliente").val();
+        const nomeCliente = $("#cliente").val();
 
         if (!tipoPagamento) {
             alert("Selecione o tipo de pagamento.");
@@ -82,7 +138,45 @@ $(document).ready(() => {
             return;
         }
 
-        alert("Compra registrada com sucesso!");
-        // Aqui você pode enviar os dados para o backend via fetch ou AJAX
+        const itens = [];
+        $("#tabela-produtos tbody tr").each((_, row) => {
+            const rowEl = $(row);
+            itens.push({
+                id_produto: rowEl.data("id"),
+                quantidade: parseInt(rowEl.find("td:nth-child(2) input").val()), // Editar a quantidade
+                preco_unitario: parseFloat(rowEl.find("td:nth-child(3)").text().replace("R$ ", ""))
+            });
+        });
+
+        if (itens.length === 0) {
+            alert("Adicione pelo menos um produto à compra.");
+            return;
+        }
+
+        const idCliente = $("#cliente").val();
+
+        const compraData = {
+            tipo_pagamento: tipoPagamento,
+            id_cliente: idCliente || null, // Enviar o ID do cliente
+            itens,
+        };
+
+        try {
+            const response = await fetch("/finalizar-compra", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(compraData),
+            });
+
+            if (response.ok) {
+                alert("Compra registrada com sucesso!");
+                window.location.reload();
+            } else {
+                const errorData = await response.json();
+                alert(`Erro ao registrar compra: ${errorData.erro}`);
+            }
+        } catch (error) {
+            alert("Erro ao registrar compra. Tente novamente.");
+        }
     });
 });

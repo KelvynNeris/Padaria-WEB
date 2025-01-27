@@ -268,7 +268,7 @@ class Usuario:
                 mycursor.close()
                 mydb.close()
 
-    def inserir_produto(self, nome, descricao, estocado, categoria, fornecedor, preco):
+    def inserir_produto(self, nome, descricao, unidade_estocado, kilo_estocado, categoria, fornecedor, preco, preco_kilo, vendido_por_kilo):
         try:
             # Conecta ao banco de dados
             mydb = Conexao.conectar()
@@ -276,9 +276,20 @@ class Usuario:
 
             # SQL para inserir os dados
             sql = """
-                INSERT INTO tb_produtos (nome, descricao, quantidade_estoque, id_categoria, id_fornecedor, preco) VALUES (%s, %s, %s, %s, %s, %s)
+                INSERT INTO tb_produtos (
+                    nome, descricao, quantidade_estoque, quantidade_estoque_kilos, 
+                    id_categoria, id_fornecedor, preco, preco_por_kilo, vendido_por_kilo
+                ) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
-            val = (nome, descricao, estocado, categoria, fornecedor, preco)
+
+            # Verifica o tipo de venda
+            if vendido_por_kilo:
+                # Produto vendido por kilo
+                val = (nome, descricao, unidade_estocado, kilo_estocado, categoria, fornecedor, preco, preco_kilo, True)
+            else:
+                # Produto vendido por unidade
+                val = (nome, descricao, unidade_estocado, kilo_estocado, categoria, fornecedor, preco, preco_kilo, False)
 
             mycursor.execute(sql, val)  # Executa a query
             mydb.commit()  # Salva as alterações
@@ -292,6 +303,7 @@ class Usuario:
             if mydb.is_connected():
                 mycursor.close()
                 mydb.close()
+
 
     def exibir_fornecedor(self):
         # Conecta ao banco de dados
@@ -336,23 +348,22 @@ class Usuario:
 
     def exibir_produtos(self):
         """
-        Retorna uma lista com todos os produtos, incluindo informações da categoria e do fornecedor,
-        consultando as tabelas `tb_produtos`, `tb_categorias` e `tb_fornecedores`.
-
-        Retorno:
-        - Uma lista de dicionários, onde cada dicionário representa um produto com seus detalhes.
+        Retorna uma lista com todos os produtos, incluindo informações da categoria, fornecedor e tipo (unidade ou kilo).
         """
         mydb = Conexao.conectar()  # Conecta ao banco de dados
         mycursor = mydb.cursor()
 
-        # Query SQL para obter os produtos com suas respectivas categorias e fornecedores
+        # Query SQL para obter os produtos com informações adicionais
         sql = """
             SELECT 
                 p.id_produto,
                 p.nome AS nome_produto,
                 p.descricao,
                 p.quantidade_estoque,
+                p.quantidade_estoque_kilos,
                 p.preco,
+                p.preco_por_kilo,
+                p.vendido_por_kilo,
                 c.nome AS nome_categoria,
                 f.nome AS nome_fornecedor
             FROM tb_produtos p
@@ -362,23 +373,25 @@ class Usuario:
         """
         mycursor.execute(sql)
 
-        # Obtém os resultados e os organiza em uma lista
+        # Organizar os resultados
         resultado = mycursor.fetchall()
         lista_produto = [
             {
                 'id_produto': produto[0],
                 'nome_produto': produto[1],
                 'descricao': produto[2],
-                'quantidade_estoque': produto[3],
-                'preco': produto[4],
-                'nome_categoria': produto[5],
-                'nome_fornecedor': produto[6]
+                'quantidade': produto[4] if produto[7] else produto[3],  # Usa kilos ou unidades
+                'preco': produto[6] if produto[7] else produto[5],  # Preço por kilo ou por unidade
+                'vendido_por_kilo': produto[7],
+                'nome_categoria': produto[8],
+                'nome_fornecedor': produto[9],
             }
             for produto in resultado
         ]
 
-        mydb.close()  # Fecha a conexão com o banco de dados
+        mydb.close()  # Fecha a conexão com o banco
         return lista_produto
+
     
     def exibir_usuarios(self):
         mydb = Conexao.conectar()  # Conecta ao banco de dados
@@ -544,9 +557,120 @@ class Usuario:
                 'id_produto': select_produtos[0],
                 'nome': select_produtos[1],
                 'preco': select_produtos[4],
+                'preco_por_kilo': select_produtos[5],
+                'vendido_kilo': select_produtos[8]
             }
             for select_produtos in resultado
         ]
 
         mydb.close()  # Fecha a conexão com o banco de dados
         return lista_select_produtos
+    
+    from flask import jsonify
+
+    def exibir_clientes(self):
+        mydb = Conexao.conectar()  # Conecta ao banco de dados
+        mycursor = mydb.cursor()
+
+        sql = """
+            SELECT * FROM tb_clientes_fiado
+        """
+
+        mycursor.execute(sql)
+
+        # Obtém os resultados e os organiza em uma lista
+        resultado = mycursor.fetchall()
+        lista_clientes = [
+            {
+                'id_cliente': clientes[0],
+                'nome': clientes[1],
+                'saldo': clientes[5],
+            }
+            for clientes in resultado
+        ]
+
+        mydb.close()  # Fecha a conexão com o banco de dados
+        return lista_clientes
+
+    def buscar_cliente_por_id(self, id_cliente):
+        """
+        Busca um cliente no banco de dados pelo ID.
+        :param id_cliente: ID do cliente a ser buscado.
+        :return: Dicionário contendo os dados do cliente ou None se não encontrado.
+        """
+        try:
+            mydb = Conexao.conectar()  # Conecta ao banco de dados
+            with mydb.cursor() as mycursor:
+                # Query para buscar cliente pelo ID
+                sql = "SELECT id_cliente, nome FROM tb_clientes_fiado WHERE id_cliente = %s LIMIT 1"
+                mycursor.execute(sql, (id_cliente,))
+                resultado = mycursor.fetchone()
+
+                # Retorna um dicionário com os dados do cliente ou None
+                return {"id_cliente": resultado[0], "nome": resultado[1]} if resultado else None
+        except Exception as e:
+            print(f"Erro ao buscar cliente por ID: {e}")
+            raise
+        finally:
+            mydb.close()
+
+
+    def calcular_total_venda(self, itens):
+        """
+        Calcula o total da venda com base nos itens fornecidos.
+        """
+        return sum(item['quantidade'] * item['preco_unitario'] for item in itens)
+
+    def inserir_venda(self, id_usuario, total_venda, id_cliente=None):
+        """
+        Insere uma venda no banco de dados e retorna o ID gerado.
+        :param id_usuario: ID do usuário que realizou a venda.
+        :param total_venda: Valor total da venda.
+        :param id_cliente: ID do cliente (opcional).
+        :return: ID da venda gerado.
+        """
+        try:
+            sql_venda = """
+                INSERT INTO tb_vendas (id_usuario, total, id_cliente) 
+                VALUES (%s, %s, %s)
+            """
+            mydb = Conexao.conectar()  # Conecta ao banco de dados
+            mycursor = mydb.cursor()
+            
+            mycursor.execute(sql_venda, (id_usuario, total_venda, id_cliente))
+            id_venda = mycursor.lastrowid  # Obtém o último ID inserido
+            
+            mydb.commit()  # Confirma a transação
+            mycursor.close()
+            mydb.close()
+            
+            return id_venda
+        except Exception as e:
+            print(f"Erro ao inserir venda: {e}")
+            raise
+
+
+
+    def inserir_itens_venda(self, id_venda, itens):
+        """
+        Insere os itens de uma venda no banco de dados.
+        :param id_venda: ID da venda associada.
+        :param itens: Lista de itens contendo id_produto, quantidade e preco_unitario.
+        """
+        try:
+            sql_item = """
+                INSERT INTO tb_itens_venda (id_venda, id_produto, quantidade, preco_unitario) 
+                VALUES (%s, %s, %s, %s)
+            """
+            mydb = Conexao.conectar()  # Conecta ao banco de dados
+            mycursor = mydb.cursor()
+            
+            for item in itens:
+                mycursor.execute(sql_item, (id_venda, item['id_produto'], item['quantidade'], item['preco_unitario']))
+            
+            mydb.commit()  # Confirma a transação
+            mycursor.close()
+            mydb.close()
+        except Exception as e:
+            print(f"Erro ao inserir itens da venda: {e}")
+            raise

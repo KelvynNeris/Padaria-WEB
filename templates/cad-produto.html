@@ -4,33 +4,60 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 </style>
 <link rel="stylesheet" href="../static/styles/cad-produto.css">
-    <main>
-        <div class="btn-voltar">
-            <button onclick="window.history.back()"><img
-                    src="https://www.svgrepo.com/show/324205/back-arrow-navigation.svg" alt=""></button>
-        </div>
+<main>
+    <div class="btn-voltar">
+        <button onclick="window.history.back()"><img
+                src="https://www.svgrepo.com/show/324205/back-arrow-navigation.svg" alt=""></button>
+    </div>
+    
+    <form action="/inserir_produto" method="post" enctype="multipart/form-data">
+        <div class="espacamento1"></div>
+        <h2>Adicione um produto!</h2>
+        <input name="nome" type="text" id="nome" placeholder="Nome do produto" required>
+        <input name="descricao" type="text" id="descricao" placeholder="Descrição" required>
+        <select id="categoria" name="categoria" required>
+            <option disabled selected value="">Categoria</option>
+            {% for registro in categorias %}
+            <option value="{{ registro.id_categoria }}">{{ registro.nome }}</option>
+            {% endfor %}
+        </select>
         
-        <form action="/inserir_produto" method="post" enctype="multipart/form-data">
-            <div class="espacamento1"></div>
-            <h2>Adicione um produto!</h2>
-            <input name="nome" type="text" id="nome" placeholder="Nome do produto" required>
-            <input name="descricao" type="tel" id="descricao" placeholder="Descrição" required>
-            <select id="categoria" name="categoria" required>
-                <option disabled selected value="">Categoria</option>
-                {% for registro in categorias %}
-                <option value="{{ registro.id_categoria }}">{{ registro.nome }}</option>
-                {% endfor %}
-            </select>
-            <input name="preco" type="text" id="preco" placeholder="Preço" required>
-            <input name="estocado" type="text" id="estocado" placeholder="Estocado" required>
-            <select id="fornecedor" name="fornecedor" required>
-                <option disabled selected value="">Fornecedor</option>
-                {% for registro in fornecedores %}
-                <option value="{{ registro.id_fornecedor }}">{{ registro.nome }}</option>
-                {% endfor %}
-            </select>
+        <!-- Checkbox para definir o tipo de venda -->
+        <label>
+            <input type="checkbox" id="precoPorUnidade" name="preco_por_unidade">
+            Preço por Unidade
+        </label>
+        <label>
+            <input type="checkbox" id="precoPorKilo" name="preco_por_kilo">
+            Preço por Kilo
+        </label>
 
-            <button type="submit" class="btn-Cadastrar">Adicionar</button>
-        </form>
-    </main>
+        <!-- Inputs para Preço e Estoque -->
+        <div id="campoPreco" style="display: none;">
+            <input name="preco" type="text" id="preco" placeholder="Preço por Unidade">
+        </div>
+        <div id="campoUnidades" style="display: none;">
+            <input name="unidades_estocadas" type="text" id="unidades_estocadas" placeholder="Unidades Estocadas">
+        </div>
+        <div id="campoKilos" style="display: none;">
+            <input name="kilos_estocados" type="text" id="kilos_estocados" placeholder="Kilos Estocados">
+        </div>
+        <div id="campoPrecoKilo" style="display: none;">
+            <input name="preco_kilo" type="text" id="preco_kilo" placeholder="Preço por Kilo">
+        </div>
+
+        <select id="fornecedor" name="fornecedor" required>
+            <option disabled selected value="">Fornecedor</option>
+            {% for registro in fornecedores %}
+            <option value="{{ registro.id_fornecedor }}">{{ registro.nome }}</option>
+            {% endfor %}
+        </select>
+
+        <input type="hidden" id="vendido_por_kilo" name="vendido_por_kilo" value="false">
+
+        <button type="submit" class="btn-Cadastrar">Adicionar</button>
+    </form>
+</main>
+
+<script src="../static/js/cad_produto.js" defer></script>
 {% endblock %}

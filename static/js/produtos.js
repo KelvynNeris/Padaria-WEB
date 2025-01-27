@@ -1,13 +1,28 @@
 function atualizarQuantidade(idProduto, acao) {
-    const input = document.getElementById(`input-${idProduto}`);
-    const quantidadeSpan = document.getElementById(`quantidade-${idProduto}`);
-    const quantidade = parseInt(input.value);
+    const inputElement = document.getElementById(`input-${idProduto}`);
+    const quantidadeElement = document.getElementById(`quantidade-${idProduto}`);
+    const novaQuantidade = parseFloat(inputElement.value);
 
-    if (isNaN(quantidade) || quantidade <= 0) {
+    if (isNaN(novaQuantidade) || novaQuantidade <= 0) {
         exibirMensagemErro("Por favor, insira uma quantidade válida.");
         return;
     }
 
+    const atualQuantidade = parseFloat(quantidadeElement.textContent);
+    const quantidadeAtualizada = acao === "colocar"
+        ? atualQuantidade + novaQuantidade
+        : atualQuantidade - novaQuantidade;
+
+    // Verificar se a nova quantidade não é negativa
+    if (quantidadeAtualizada < 0) {
+        exibirMensagemErro("Quantidade não pode ser negativa.");
+        return;
+    }
+
+    // Atualiza a quantidade na interface
+    quantidadeElement.textContent = quantidadeAtualizada.toFixed(2); // Exibe com 2 casas decimais, no caso de Kilos
+
+    // Enviar a requisição para o backend para atualizar no banco de dados
     fetch('/atualizar_quantidade', {
         method: 'POST',
         headers: {
@@ -15,18 +30,17 @@ function atualizarQuantidade(idProduto, acao) {
         },
         body: JSON.stringify({
             id_produto: idProduto,
-            quantidade: quantidade,
+            quantidade: novaQuantidade,
             acao: acao,
         }),
     })
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                quantidadeSpan.textContent = data.nova_quantidade;
-                input.value = '';
-                exibirMensagemSucesso("Quantidade atualizada com sucesso!");
-            } else {
+            if (!data.success) {
                 exibirMensagemErro(data.error || 'Erro ao atualizar a quantidade.');
+            } else {
+                inputElement.value = ''; // Limpa o campo de input após sucesso
+                exibirMensagemSucesso("Quantidade atualizada com sucesso!");
             }
         })
         .catch(error => {

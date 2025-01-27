@@ -21,8 +21,12 @@
     <form id="form-compra">
         <!-- Nome do cliente (exibido somente se o pagamento for fiado) -->
         <section class="nome-cliente-section" style="display:none;">
-            <label for="nome-cliente">Nome do Cliente (para pagamento fiado):</label>
-            <input type="text" id="nome-cliente" name="nome-cliente" placeholder="Digite o nome do cliente" required>
+            <select id="cliente" name="cliente" style="width: 100%;">
+                <option value="" disabled selected>Selecione um cliente</option>
+                {% for registro in lista_clientes %}
+                <option value="{{ registro.id_cliente }}" data-saldo="{{ registro.saldo }}">{{ registro.nome }}</option>
+                {% endfor %}
+            </select>
         </section>
 
         <!-- Adicionar produtos -->
@@ -33,11 +37,24 @@
                 <select id="produto" name="produto" style="width: 100%;">
                     <option value="" disabled selected>Pesquise ou selecione um produto</option>
                     {% for registro in lista_select_produtos %}
-                    <option value="{{ registro.id_produto }}" data-preco="{{ registro.preco }}">{{ registro.nome }} - R$ {{ registro.preco }}</option>
+                    <option value="{{ registro.id_produto }}" data-preco="{{ registro.preco }}"
+                        data-preco-kilo="{{ registro.preco_por_kilo }}" data-vendido-kilo="{{ registro.vendido_kilo }}">
+                        {{ registro.nome }}
+                        -
+                        {% if registro.vendido_kilo == 1 %}
+                        R$ {{ registro.preco_por_kilo }} Kg
+                        {% else %}
+                        R$ {{ registro.preco }} unidade
+                        {% endif %}
+                    </option>
                     {% endfor %}
-                </select>                
+                </select>
+
                 <label for="quantidade">Quantidade:</label>
-                <input type="number" id="quantidade" name="quantidade" min="1" placeholder="0">
+                <div id="quantidade-container">
+                    <input type="number" id="quantidade" name="quantidade" min="1" placeholder="0">
+                </div>
+
                 <button type="button" id="adicionar-produto">Adicionar</button>
             </div>
             <table id="tabela-produtos">

@@ -32,15 +32,18 @@ CREATE TABLE tb_categorias (
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de produtos
 CREATE TABLE tb_produtos (
     id_produto INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     descricao TEXT,
     id_categoria INT,
-    preco DECIMAL(10,2) NOT NULL,
-    quantidade_estoque INT NOT NULL,
+    preco DECIMAL(10,2) DEFAULT 0 NOT NULL,
+    preco_por_kilo DECIMAL(10,2) DEFAULT 0 NOT NULL,
+    quantidade_estoque INT DEFAULT 0 NOT NULL,
+    quantidade_estoque_kilos DECIMAL(10,2) DEFAULT 0 NOT NULL,
+    vendido_por_kilo BOOLEAN DEFAULT FALSE,
     id_fornecedor INT,
+    ativo BOOLEAN DEFAULT TRUE,
     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_categoria) REFERENCES tb_categorias(id_categoria) ON DELETE SET NULL,
     FOREIGN KEY (id_fornecedor) REFERENCES tb_fornecedores(id_fornecedor) ON DELETE SET NULL
@@ -74,13 +77,27 @@ CREATE TABLE tb_transacoes (
     data_transacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Tabela de clientes fiado
+CREATE TABLE tb_clientes_fiado (
+    id_cliente INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    telefone VARCHAR(15) NOT NULL,
+    email VARCHAR(100),
+    endereco TEXT,
+    saldo_em_aberto DECIMAL(10,2) DEFAULT 0.00,
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ativo BOOLEAN DEFAULT TRUE
+);
+
 -- Tabela de vendas
 CREATE TABLE tb_vendas (
     id_venda INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
     total DECIMAL(10,2) NOT NULL,
     data_venda TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_usuario) REFERENCES tb_usuarios(id_usuario) ON DELETE CASCADE
+    id_cliente INT DEFAULT NULL,
+    FOREIGN KEY (id_usuario) REFERENCES tb_usuarios(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_cliente) REFERENCES tb_clientes_fiado(id_cliente) ON DELETE SET NULL
 );
 
 -- Tabela de itens da venda
@@ -116,3 +133,11 @@ INSERT INTO tb_categorias (nome, descricao) VALUES
 ('Produtos Regionais', 'Produtos típicos da região, como broas e pães de queijo.'),
 ('Conservas', 'Conservas como palmitos, azeitonas e molhos.'),
 ('Embalados', 'Produtos embalados como bolos prontos e snacks industriais.');
+
+INSERT INTO tb_usuarios (nome, email, senha, telefone, tipo_usuario, primeiro_login)
+VALUES ('Administrador Master', 'adm@adm.com', 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', '123456789', 'Administrador', TRUE);
+
+INSERT INTO tb_clientes_fiado (nome, telefone, email, endereco, saldo_em_aberto)
+VALUES 
+('João Silva', '11987654321', 'joao.silva@email.com', 'Rua das Flores, 123, São Paulo', 0.00),
+('Maria Souza', '11912345678', 'maria.souza@email.com', 'Avenida Central, 456, Araraquara', 50.00);

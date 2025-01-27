@@ -409,33 +409,44 @@ def inserir_fornecedor():
 
 @app.route('/inserir_produto', methods=['GET', 'POST'])
 def inserir_produto():
-    # Verifica se o usuário logado é um funcionário aguardando aprovação
+    # Verifica se o usuário está logado e autorizado
     if session.get('usuario_logado', {}).get('tipo') == 'Funcionario' and session.get('usuario_logado', {}).get('primeiro_login') == True:
-        # Atualiza o estado da sessão dinamicamente
         usuario = Usuario()
         status_atual = usuario.verificar_status(session['usuario_logado']['id_usuario'])
         if not status_atual['primeiro_login']:
-            session['usuario_logado']['primeiro_login'] = False  # Atualiza a sessão
+            session['usuario_logado']['primeiro_login'] = False
         else:
             return render_template("aguardando_aprovacao.html")
+
     if 'usuario_logado' not in session:
-        return redirect('/entrar')  # Redireciona para a página de login
+        return redirect('/entrar')
+
     usuario = Usuario()
+
     if request.method == 'POST':
         # Obtém os dados do formulário
         nome = request.form.get('nome')
         descricao = request.form.get('descricao')
-        estocado = request.form.get('estocado')
+        unidades_estocadas = request.form.get('unidades_estocadas') or 0
+        kilos_estocados = request.form.get('kilos_estocados') or 0
         categoria = request.form.get('categoria')
         fornecedor = request.form.get('fornecedor')
-        preco = request.form.get('preco')
+        preco = request.form.get('preco') or 0
+        preco_kilo = request.form.get('preco_kilo') or 0
 
-        # Valida os campos obrigatórios
-        if not (estocado and descricao and categoria and nome and fornecedor and preco):
-            return "Todos os campos são obrigatórios!", 400
-
-        # Chama a função para inserir o fornecedor
-        sucesso = usuario.inserir_produto(nome, descricao, estocado, categoria, fornecedor, preco)
+        # Valida se é vendido por unidade ou por kilo
+        if unidades_estocadas and preco:
+            vendido_por_kilo = False
+            sucesso = usuario.inserir_produto(
+                nome, descricao, unidades_estocadas, kilos_estocados, categoria, fornecedor, preco, preco_kilo, vendido_por_kilo
+            )
+        elif kilos_estocados and preco_kilo:
+            vendido_por_kilo = True
+            sucesso = usuario.inserir_produto(
+                nome, descricao, unidades_estocadas, kilos_estocados, categoria, fornecedor, preco, preco_kilo, vendido_por_kilo
+            )
+        else:
+            return "Erro: Informe os dados corretamente para unidade ou kilo.", 400
 
         if sucesso:
             categorias = usuario.exibir_categoria()
@@ -443,6 +454,7 @@ def inserir_produto():
             return render_template('cad-produto.html', mensagem="Produto inserido com sucesso!", categorias=categorias, fornecedores=fornecedores)
         else:
             return "Erro ao inserir o produto. Tente novamente.", 500
+
     categorias = usuario.exibir_categoria()
     fornecedores = usuario.exibir_fornecedor()
     return render_template('cad-produto.html', categorias=categorias, fornecedores=fornecedores)
@@ -572,7 +584,47 @@ def compra():
     usuario = Usuario()
     if request.method == 'GET':
         lista_select_produtos = usuario.exibir_select_produtos()
-        return render_template("compra.html", lista_select_produtos=lista_select_produtos)
+        lista_clientes = usuario.exibir_clientes()
+        return render_template("compra.html", lista_select_produtos=lista_select_produtos, lista_clientes=lista_clientes)
+    
+@app.route('/finalizar-compra', methods=['POST'])
+def finalizar_compra():
+    try:
+        # Inicializar variáveis e dados básicos
+        usuario = Usuario()
+        data = request.json
+        tipo_pagamento = data.get('tipo_pagamento')
+        id_cliente = data.get('id_cliente', None)  # ID do cliente recebido no corpo da requisição
+        itens = data.get('itens', [])
+        id_usuario = session.get('usuario_logado', {}).get('id_usuario')
+
+        # Validar dados básicos
+        if not tipo_pagamento:
+            return jsonify({'erro': 'O tipo de pagamento é obrigatório.'}), 400
+        if tipo_pagamento == 'fiado' and not id_cliente:
+            return jsonify({'erro': 'O ID do cliente é obrigatório para vendas fiado.'}), 400
+
+        # Buscar o nome do cliente pelo ID (se necessário)
+        nome_cliente = None
+        if tipo_pagamento == 'fiado':
+            cliente = usuario.buscar_cliente_por_id(id_cliente)
+            if not cliente:
+                return jsonify({'erro': f'Cliente com ID {id_cliente} não encontrado.'}), 400
+            nome_cliente = cliente.get('nome')  # Apenas para referência ou log, se necessário
+
+        # Calcular o total da venda
+        total_venda = usuario.calcular_total_venda(itens)
+
+        # Inserir a venda
+        id_venda = usuario.inserir_venda(id_usuario, total_venda, id_cliente)
+
+        # Inserir os itens da venda
+        usuario.inserir_itens_venda(id_venda, itens)
+
+        return jsonify({'mensagem': 'Venda registrada com sucesso!', 'id_venda': id_venda}), 201
+
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8080)  # Define o host como localhost e a porta como 8080
