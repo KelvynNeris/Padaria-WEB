@@ -629,44 +629,42 @@ def finalizar_compra():
         print(f"Erro ao finalizar compra: {e}")
         return jsonify({'erro': 'Erro interno no servidor.'}), 500
 
-@app.route('/relatorio_mais_vendidos', methods=['GET', 'POST'])
+@app.route('/relatorio_mais_vendidos', methods=['GET'])
 def relatorio_mais_vendidos():
     usuario = Usuario()
     
-    # Chama os métodos para obter as listas
-    lista_mais_vendidos_produtos_quantidade, lista_mais_vendidos_produtos_arrecadado = usuario.relatorio_mais_vendidos_produtos()
-    lista_mais_vendidos_categorias, lista_mais_vendidos_categorias_arrecadado = usuario.relatorio_mais_vendidos_categorias()
-    lista_metodos_pagamento_transacoes, lista_metodos_pagamento_arrecadado = usuario.relatorio_metodos_pagamento_mais_usados()
-
-    # Checa se o filtro foi aplicado
+    # Obtém os filtros da URL
     filtro = request.args.get('filtro', 'quantidade')
+    data_inicial = request.args.get('data_inicial', None)
+    data_final = request.args.get('data_final', None)
 
+    # Obtém listas com base no filtro
     if filtro == 'total_arrecadado':
-        # Exibir listas baseadas em arrecadado
-        produtos_principais = lista_mais_vendidos_produtos_arrecadado[:3]
-        produtos_extras = lista_mais_vendidos_produtos_arrecadado[3:]
-        categorias_principais = lista_mais_vendidos_categorias_arrecadado[:3]
-        categorias_extras = lista_mais_vendidos_categorias_arrecadado[3:]
-        metodos_principais = lista_metodos_pagamento_arrecadado[:3]
-        metodos_extras = lista_metodos_pagamento_arrecadado[3:]
+        produtos = usuario.relatorio_mais_vendidos_produtos()[1]
+        categorias = usuario.relatorio_mais_vendidos_categorias()[1]
+        metodos = usuario.relatorio_metodos_pagamento_mais_usados()[1]
     else:
-        # Exibir listas baseadas em quantidade
-        produtos_principais = lista_mais_vendidos_produtos_quantidade[:3]
-        produtos_extras = lista_mais_vendidos_produtos_quantidade[3:]
-        categorias_principais = lista_mais_vendidos_categorias[:3]
-        categorias_extras = lista_mais_vendidos_categorias[3:]
-        metodos_principais = lista_metodos_pagamento_transacoes[:3]
-        metodos_extras = lista_metodos_pagamento_transacoes[3:]
+        produtos = usuario.relatorio_mais_vendidos_produtos()[0]
+        categorias = usuario.relatorio_mais_vendidos_categorias()[0]
+        metodos = usuario.relatorio_metodos_pagamento_mais_usados()[0]
+
+    # Aplicar filtro por data, se fornecido
+    if data_inicial or data_final:
+        produtos = [p for p in produtos if usuario.dentro_do_periodo(p['data'], data_inicial, data_final)]
+        categorias = [c for c in categorias if usuario.dentro_do_periodo(c['data'], data_inicial, data_final)]
+        metodos = [m for m in metodos if usuario.dentro_do_periodo(m['data'], data_inicial, data_final)]
 
     return render_template(
         'relatorio_mais_vendidos.html',
         filtro=filtro,
-        produtos_principais=produtos_principais,
-        produtos_extras=produtos_extras,
-        categorias_principais=categorias_principais,
-        categorias_extras=categorias_extras,
-        metodos_principais=metodos_principais,
-        metodos_extras=metodos_extras
+        data_inicial=data_inicial,
+        data_final=data_final,
+        produtos_principais=produtos[:3],
+        produtos_extras=produtos[3:],
+        categorias_principais=categorias[:3],
+        categorias_extras=categorias[3:],
+        metodos_principais=metodos[:3],
+        metodos_extras=metodos[3:]
     )
 
 if __name__ == "__main__":

@@ -8,15 +8,27 @@
 </header>
 
 <main class="relatorio-main">
-    <!-- Filtro para Ordenar por Quantidade ou Total Arrecadado -->
-    <div class="select-wrapper">
-        <span class="material-symbols-outlined">filter_alt</span>
-        <select id="filtro-quantidade" onchange="location.href='/relatorio_mais_vendidos?filtro=' + this.value">
-            <option value="quantidade" {% if filtro == 'quantidade' %}selected{% endif %}>Quantidade Vendida</option>
-            <option value="total_arrecadado" {% if filtro == 'total_arrecadado' %}selected{% endif %}>Total Arrecadado</option>
-        </select>
-    </div>
+    <!-- Filtros -->
+    <div class="filtros-container">
+        <!-- Filtro por Quantidade ou Total Arrecadado -->
+        <div class="select-wrapper">
+            <span class="material-symbols-outlined">filter_alt</span>
+            <select id="filtro-quantidade" onchange="atualizarFiltros()">
+                <option value="quantidade" {% if filtro == 'quantidade' %}selected{% endif %}>Quantidade Vendida</option>
+                <option value="total_arrecadado" {% if filtro == 'total_arrecadado' %}selected{% endif %}>Total Arrecadado</option>
+            </select>
+        </div>
     
+        <!-- Filtro por Data -->
+        <form id="form-filtros" method="GET" action="/relatorio_mais_vendidos">
+            <label for="data-inicial">De:</label>
+            <input type="date" id="data-inicial" name="data_inicial" value="{{ data_inicial }}">
+            <label for="data-final">Até:</label>
+            <input type="date" id="data-final" name="data_final" value="{{ data_final }}">
+            <input type="hidden" id="input-filtro" name="filtro" value="{{ filtro }}">
+            <button type="submit" class="btn-filtrar">Filtrar</button>
+        </form>
+    </div>    
 
     <!-- Exibe as listas baseadas no filtro selecionado -->
     <section class="relatorio-section">

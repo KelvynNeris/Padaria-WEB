@@ -1,6 +1,7 @@
 from conexao import Conexao
 from hashlib import sha256
 from flask import jsonify
+from datetime import datetime
 
 class Usuario:
     
@@ -746,13 +747,16 @@ class Usuario:
                 SELECT 
                     p.nome, 
                     SUM(i.quantidade) AS total_vendido,
-                    SUM(i.quantidade * i.preco_unitario) AS total_arrecadado
+                    SUM(i.quantidade * i.preco_unitario) AS total_arrecadado,
+                    v.data_venda
                 FROM 
                     tb_itens_venda i
                 JOIN 
                     tb_produtos p ON i.id_produto = p.id_produto
+                JOIN 
+                    tb_vendas v ON i.id_venda = v.id_venda
                 GROUP BY 
-                    p.id_produto
+                    p.id_produto, v.data_venda
                 ORDER BY 
                     total_vendido DESC;
             """
@@ -762,13 +766,16 @@ class Usuario:
                 SELECT 
                     p.nome, 
                     SUM(i.quantidade) AS total_vendido,
-                    SUM(i.quantidade * i.preco_unitario) AS total_arrecadado
+                    SUM(i.quantidade * i.preco_unitario) AS total_arrecadado,
+                    v.data_venda
                 FROM 
                     tb_itens_venda i
                 JOIN 
                     tb_produtos p ON i.id_produto = p.id_produto
+                JOIN 
+                    tb_vendas v ON i.id_venda = v.id_venda
                 GROUP BY 
-                    p.id_produto
+                    p.id_produto, v.data_venda
                 ORDER BY 
                     total_arrecadado DESC;
             """
@@ -786,7 +793,8 @@ class Usuario:
                 {
                     'nome': produto[0],
                     'total_vendido': produto[1],
-                    'total_arrecadado': produto[2]
+                    'total_arrecadado': produto[2],
+                    'data': produto[3]
                 }
                 for produto in resultados_1
             ]
@@ -796,7 +804,8 @@ class Usuario:
                 {
                     'nome': produto[0],
                     'total_vendido': produto[1],
-                    'total_arrecadado': produto[2]
+                    'total_arrecadado': produto[2],
+                    'data': produto[3]
                 }
                 for produto in resultados_2
             ]
@@ -821,15 +830,18 @@ class Usuario:
             SELECT 
                 c.nome AS nome_categoria,
                 SUM(i.quantidade) AS total_vendido,
-                SUM(i.quantidade * i.preco_unitario) AS total_arrecadado
+                SUM(i.quantidade * i.preco_unitario) AS total_arrecadado,
+                v.data_venda
             FROM 
                 tb_itens_venda i
             JOIN 
                 tb_produtos p ON i.id_produto = p.id_produto
             JOIN
                 tb_categorias c ON p.id_categoria = c.id_categoria
+			JOIN 
+				tb_vendas v ON i.id_venda = v.id_venda
             GROUP BY 
-                c.id_categoria
+                c.id_categoria, v.data_venda
             ORDER BY 
                 total_vendido DESC;
         """
@@ -839,15 +851,18 @@ class Usuario:
             SELECT 
                 c.nome AS nome_categoria,
                 SUM(i.quantidade) AS total_vendido,
-                SUM(i.quantidade * i.preco_unitario) AS total_arrecadado
+                SUM(i.quantidade * i.preco_unitario) AS total_arrecadado,
+                v.data_venda
             FROM 
                 tb_itens_venda i
             JOIN 
                 tb_produtos p ON i.id_produto = p.id_produto
             JOIN
                 tb_categorias c ON p.id_categoria = c.id_categoria
+			JOIN 
+				tb_vendas v ON i.id_venda = v.id_venda
             GROUP BY 
-                c.id_categoria
+                c.id_categoria, v.data_venda
             ORDER BY 
                 total_arrecadado DESC;
         """
@@ -866,7 +881,8 @@ class Usuario:
                 {
                     'nome_categoria': vendidos_categorias[0],
                     'total_vendido': vendidos_categorias[1],
-                    'total_arrecadado': vendidos_categorias[2]
+                    'total_arrecadado': vendidos_categorias[2],
+                    'data': vendidos_categorias[3]
                 }
                 for vendidos_categorias in resultados_1
             ]
@@ -875,7 +891,8 @@ class Usuario:
                 {
                     'nome_categoria': vendidos_categorias[0],
                     'total_vendido': vendidos_categorias[1],
-                    'total_arrecadado': vendidos_categorias[2]
+                    'total_arrecadado': vendidos_categorias[2],
+                    'data': vendidos_categorias[3]
                 }
                 for vendidos_categorias in resultados_2
             ]
@@ -908,11 +925,12 @@ class Usuario:
                 SELECT 
                     v.pagamento AS tipo_pagamento,
                     COUNT(v.id_venda) AS total_transacoes,
-                    SUM(v.total) AS total_arrecadado
+                    SUM(v.total) AS total_arrecadado,
+					v.data_venda
                 FROM 
                     tb_vendas v
                 GROUP BY 
-                    v.pagamento
+                    v.pagamento,  v.data_venda
                 ORDER BY 
                     total_transacoes DESC;
             """
@@ -922,11 +940,12 @@ class Usuario:
                 SELECT 
                     v.pagamento AS tipo_pagamento,
                     COUNT(v.id_venda) AS total_transacoes,
-                    SUM(v.total) AS total_arrecadado
+                    SUM(v.total) AS total_arrecadado,
+					v.data_venda
                 FROM 
                     tb_vendas v
                 GROUP BY 
-                    v.pagamento
+                    v.pagamento,  v.data_venda
                 ORDER BY 
                     total_arrecadado DESC;
             """
@@ -945,6 +964,7 @@ class Usuario:
                     'tipo_pagamento': metodo[0],
                     'total_transacoes': metodo[1],
                     'total_arrecadado': float(metodo[2]),  # Converte para float para facilitar formatação
+                    'data': metodo[3]
                 }
                 for metodo in resultados_1
             ]
@@ -955,6 +975,7 @@ class Usuario:
                     'tipo_pagamento': metodo[0],
                     'total_transacoes': metodo[1],
                     'total_arrecadado': float(metodo[2]),  # Converte para float para facilitar formatação
+                    'data': metodo[3]
                 }
                 for metodo in resultados_2
             ]
@@ -969,3 +990,26 @@ class Usuario:
             # Fecha o cursor e a conexão
             mycursor.close()
             mydb.close()
+
+    def dentro_do_periodo(self, data, data_inicial=None, data_final=None):
+        """
+        Checa se uma data está dentro do período especificado.
+        """
+        if not data_inicial and not data_final:
+            return True
+        
+        # Se a data for um objeto datetime, não precisa converter
+        if isinstance(data, str):
+            data = datetime.strptime(data, '%Y-%m-%d')
+
+        if data_inicial:
+            data_inicial = datetime.strptime(data_inicial, '%Y-%m-%d')
+            if data < data_inicial:
+                return False
+        
+        if data_final:
+            data_final = datetime.strptime(data_final, '%Y-%m-%d')
+            if data > data_final:
+                return False
+
+        return True

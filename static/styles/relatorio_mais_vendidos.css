@@ -243,3 +243,49 @@ footer {
     background-color: #f0f0f0;
     color: #333;
 }
+
+.filtros-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.filtros-container > div,
+.filtros-container > form {
+    margin: 0.5rem 0;
+}
+
+.filtro-data {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filtro-data label {
+    font-size: 1rem;
+    color: #333;
+}
+
+.filtro-data input[type="date"] {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.filtro-data .btn-filtrar {
+    background-color: #4CAF50;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.filtro-data .btn-filtrar:hover {
+    background-color: #45a049;
+}

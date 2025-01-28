@@ -53,3 +53,15 @@ function alternarBotoes(idTabela, esconderClasse, mostrarClasse) {
         console.error('Elemento não encontrado');
     }
 }
+
+function atualizarFiltros() {
+    const filtro = document.getElementById('filtro-quantidade').value;
+    const dataInicial = document.getElementById('data-inicial').value;
+    const dataFinal = document.getElementById('data-final').value;
+
+    const form = document.getElementById('form-filtros');
+    document.getElementById('input-filtro').value = filtro;
+
+    // Atualiza o formulário com os valores atuais
+    form.submit();
+}
