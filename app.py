@@ -626,5 +626,26 @@ def finalizar_compra():
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
 
+@app.route('/relatorio_mais_vendidos')
+def relatorio_mais_vendidos():
+    usuario = Usuario()
+    lista_mais_vendidos_produtos = usuario.relatorio_mais_vendidos_produtos()
+    lista_mais_vendidos_categorias = usuario.relatorio_mais_vendidos_categorias()
+    
+    # Pegue os três primeiros produtos e categorias
+    produtos_principais = lista_mais_vendidos_produtos[:3]
+    produtos_extras = lista_mais_vendidos_produtos[3:]
+    
+    categorias_principais = lista_mais_vendidos_categorias[:3]
+    categorias_extras = lista_mais_vendidos_categorias[3:]
+    
+    return render_template(
+        'relatorio_mais_vendidos.html',
+        produtos_principais=produtos_principais,
+        produtos_extras=produtos_extras,
+        categorias_principais=categorias_principais,
+        categorias_extras=categorias_extras
+    )
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8080)  # Define o host como localhost e a porta como 8080

@@ -1,0 +1,66 @@
+{% extends "modelo.html" %}
+{% block conteudo %}
+<link rel="stylesheet" href="../static/styles/relatorio_mais_vendidos.css">
+
+<header class="relatorio-header">
+    <h1>Relatório de Itens e Categorias Mais Vendidos</h1>
+</header>
+
+<main class="relatorio-main">
+    <!-- Seção de Itens Mais Vendidos -->
+    <section class="relatorio-section">
+        <h2>Itens Mais Vendidos</h2>
+        <table class="relatorio-tabela">
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>Produto</th>
+                    <th>Quantidade Vendida</th>
+                </tr>
+            </thead>
+            <tbody id="produtos-lista">
+                {% for produto in produtos_principais %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ produto.nome }}</td>
+                    <td>{{ produto.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="botoes-acoes">
+            <button class="ver-mais" onclick="mostrarMais('produtos-lista', {{ produtos_extras | tojson }})">Ver Mais</button>
+            <button class="ver-menos" onclick="mostrarMenos('produtos-lista')">Ver Menos</button>
+        </div>
+    </section>
+
+    <!-- Seção de Categorias Mais Vendidas -->
+    <section class="relatorio-section">
+        <h2>Categorias Mais Vendidas</h2>
+        <table class="relatorio-tabela">
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>Categoria</th>
+                    <th>Quantidade Vendida</th>
+                </tr>
+            </thead>
+            <tbody id="categorias-lista">
+                {% for categoria in categorias_principais %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ categoria.nome_categoria }}</td>
+                    <td>{{ categoria.total_vendido }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="botoes-acoes">
+            <button class="ver-mais" onclick="mostrarMais('categorias-lista', {{ categorias_extras | tojson }})">Ver Mais</button>
+            <button class="ver-menos" onclick="mostrarMenos('categorias-lista')">Ver Menos</button>
+        </div>
+    </section>
+</main>
+
+<script src="../static/js/relatorio_mais_vendidos.js"></script>
+{% endblock %}

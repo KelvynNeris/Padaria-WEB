@@ -1,0 +1,135 @@
+/* Estilo geral */
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9fb;
+    color: #333;
+}
+
+.relatorio-header {
+    background-color: #4CAF50;
+    color: white;
+    text-align: center;
+    padding: 2rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.relatorio-header h1 {
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+.relatorio-main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.relatorio-section {
+    margin-bottom: 3rem;
+}
+
+.relatorio-section h2 {
+    font-size: 1.8rem;
+    color: #4CAF50;
+    border-left: 5px solid #4CAF50;
+    padding-left: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.relatorio-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.relatorio-tabela th, 
+.relatorio-tabela td {
+    text-align: left;
+    padding: 1rem;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.relatorio-tabela th {
+    background-color: #f4f4f9;
+    color: #4CAF50;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.relatorio-tabela tr:hover {
+    background-color: #f0f8ff;
+}
+
+.relatorio-tabela tr:last-child td {
+    border-bottom: none;
+}
+
+.relatorio-tabela td {
+    color: #555;
+}
+
+.relatorio-tabela td:first-child,
+.relatorio-tabela th:first-child {
+    text-align: center;
+}
+
+.relatorio-tabela td:last-child {
+    font-weight: bold;
+}
+
+footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #333;
+    color: #fff;
+    margin-top: 3rem;
+    font-size: 0.9rem;
+}
+
+.botoes-acoes {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.ver-mais, .ver-menos {
+    background-color: #4CAF50;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: none; /* Inicialmente escondidos */
+}
+
+.ver-menos {
+    background-color: #f13e3b !important;
+}
+
+.ver-mais:hover {
+    background-color: #45a049;
+}
+
+.ver-mais:focus {
+    outline: none;
+    box-shadow: 0 0 5px #4CAF50;
+}
+
+.ver-mais.active, .ver-menos.active {
+    display: inline-block; /* Exibidos somente quando ativos */
+}
+
+.ver-menos:hover {
+    background-color: #e53935; /* Tom de vermelho */
+}
+
+.ver-menos:focus {
+    outline: none;
+    box-shadow: 0 0 5px #e53935; /* Tom de vermelho */
+}

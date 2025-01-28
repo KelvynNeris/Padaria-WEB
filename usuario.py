@@ -674,3 +674,84 @@ class Usuario:
         except Exception as e:
             print(f"Erro ao inserir itens da venda: {e}")
             raise
+
+    def relatorio_mais_vendidos_produtos(self):
+        mydb = Conexao.conectar()  # Conecta ao banco de dados
+        mycursor = mydb.cursor()
+
+        # Consulta SQL para obter os produtos mais vendidos
+        sql = """
+            SELECT 
+                p.nome, 
+                SUM(i.quantidade) AS total_vendido
+            FROM 
+                tb_itens_venda i
+            JOIN 
+                tb_produtos p ON i.id_produto = p.id_produto
+            GROUP BY 
+                p.id_produto
+            ORDER BY 
+                total_vendido DESC;
+        """
+
+        # Executa a consulta
+        mycursor.execute(sql)
+
+        # Obtém todos os resultados
+        resultados = mycursor.fetchall()
+
+        lista_mais_vendidos_produtos = [
+            {
+                'nome': vendidos_produtos[0],
+                'total': vendidos_produtos[1],
+            }
+            for vendidos_produtos in resultados
+        ]
+
+        # Fecha o cursor e a conexão
+        mycursor.close()
+        mydb.close()
+
+        return lista_mais_vendidos_produtos
+    
+    def relatorio_mais_vendidos_categorias(self):
+        mydb = Conexao.conectar()  # Conecta ao banco de dados
+        mycursor = mydb.cursor()
+
+        # Consulta SQL para obter as categorias mais vendidas
+        sql = """
+            SELECT 
+                c.nome AS nome_categoria,
+                SUM(i.quantidade) AS total_vendido
+            FROM 
+                tb_itens_venda i
+            JOIN 
+                tb_produtos p ON i.id_produto = p.id_produto
+            JOIN
+                tb_categorias c ON p.id_categoria = c.id_categoria
+            GROUP BY 
+                c.id_categoria
+            ORDER BY 
+                total_vendido DESC;
+        """
+
+        # Executa a consulta
+        mycursor.execute(sql)
+
+        # Obtém todos os resultados
+        resultados = mycursor.fetchall()
+
+        # Prepara os resultados
+        lista_mais_vendidos_categorias = [
+            {
+                'nome_categoria': vendidos_categorias[0],
+                'total_vendido': vendidos_categorias[1],
+            }
+            for vendidos_categorias in resultados
+        ]
+
+        # Fecha o cursor e a conexão
+        mycursor.close()
+        mydb.close()
+
+        return lista_mais_vendidos_categorias
