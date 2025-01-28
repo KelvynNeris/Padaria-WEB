@@ -1,13 +1,24 @@
 {% extends "modelo.html" %}
 {% block conteudo %}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=filter_alt" />
 <link rel="stylesheet" href="../static/styles/relatorio_mais_vendidos.css">
 
 <header class="relatorio-header">
-    <h1>Relatório de Itens e Categorias Mais Vendidos</h1>
+    <h1>Painel de Desempenho de Vendas</h1>
 </header>
 
 <main class="relatorio-main">
-    <!-- Seção de Itens Mais Vendidos -->
+    <!-- Filtro para Ordenar por Quantidade ou Total Arrecadado -->
+    <div class="select-wrapper">
+        <span class="material-symbols-outlined">filter_alt</span>
+        <select id="filtro-quantidade" onchange="location.href='/relatorio_mais_vendidos?filtro=' + this.value">
+            <option value="quantidade" {% if filtro == 'quantidade' %}selected{% endif %}>Quantidade Vendida</option>
+            <option value="total_arrecadado" {% if filtro == 'total_arrecadado' %}selected{% endif %}>Total Arrecadado</option>
+        </select>
+    </div>
+    
+
+    <!-- Exibe as listas baseadas no filtro selecionado -->
     <section class="relatorio-section">
         <h2>Itens Mais Vendidos</h2>
         <table class="relatorio-tabela">
@@ -16,6 +27,7 @@
                     <th>Posição</th>
                     <th>Produto</th>
                     <th>Quantidade Vendida</th>
+                    <th>Total Arrecadado</th>
                 </tr>
             </thead>
             <tbody id="produtos-lista">
@@ -23,18 +35,27 @@
                 <tr>
                     <td>{{ loop.index }}</td>
                     <td>{{ produto.nome }}</td>
-                    <td>{{ produto.total }}</td>
+                    <td>{{ produto.total_vendido }}</td>
+                    <td>R$ {{ produto.total_arrecadado | round(2) }}</td>
+                </tr>
+                {% endfor %}
+                {% for dado in produtos_extras %}
+                <tr class="linha-extra" style="display:none;">
+                    <td>{{ loop.index + produtos_principais|length }}</td>
+                    <td>{{ dado.nome }}</td>
+                    <td>{{ dado.total_vendido }}</td>
+                    <td>R$ {{ dado.total_arrecadado | default(0) | round(2) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         <div class="botoes-acoes">
-            <button class="ver-mais" onclick="mostrarMais('produtos-lista', {{ produtos_extras | tojson }})">Ver Mais</button>
+            <button class="ver-mais active" onclick="mostrarMais('produtos-lista')">Ver Mais</button>
             <button class="ver-menos" onclick="mostrarMenos('produtos-lista')">Ver Menos</button>
         </div>
     </section>
 
-    <!-- Seção de Categorias Mais Vendidas -->
+    <!-- O mesmo para Categorias e Métodos de Pagamento -->
     <section class="relatorio-section">
         <h2>Categorias Mais Vendidas</h2>
         <table class="relatorio-tabela">
@@ -43,6 +64,7 @@
                     <th>Posição</th>
                     <th>Categoria</th>
                     <th>Quantidade Vendida</th>
+                    <th>Total Arrecadado</th>
                 </tr>
             </thead>
             <tbody id="categorias-lista">
@@ -51,16 +73,62 @@
                     <td>{{ loop.index }}</td>
                     <td>{{ categoria.nome_categoria }}</td>
                     <td>{{ categoria.total_vendido }}</td>
+                    <td>R$ {{ categoria.total_arrecadado | round(2) }}</td>
+                </tr>
+                {% endfor %}
+                {% for dado in categorias_extras %}
+                <tr class="linha-extra" style="display:none;">
+                    <td>{{ loop.index + categorias_principais|length }}</td>
+                    <td>{{ dado.nome_categoria }}</td>
+                    <td>{{ dado.total_vendido}}</td>
+                    <td>R$ {{ dado.total_arrecadado | default(0) | round(2) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         <div class="botoes-acoes">
-            <button class="ver-mais" onclick="mostrarMais('categorias-lista', {{ categorias_extras | tojson }})">Ver Mais</button>
+            <button class="ver-mais active" onclick="mostrarMais('categorias-lista')">Ver Mais</button>
             <button class="ver-menos" onclick="mostrarMenos('categorias-lista')">Ver Menos</button>
+        </div>
+    </section>
+
+    <section class="relatorio-section">
+        <h2>Métodos de Pagamento Mais Usados</h2>
+        <table class="relatorio-tabela">
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>Método de Pagamento</th>
+                    <th>Quantidade</th>
+                    <th>Total Arrecadado</th>
+                </tr>
+            </thead>
+            <tbody id="metodos-lista">
+                {% for metodo in metodos_principais %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ metodo.tipo_pagamento }}</td>
+                    <td>{{ metodo.total_transacoes }}</td>
+                    <td>R$ {{ metodo.total_arrecadado | round(2) }}</td>
+                </tr>
+                {% endfor %}
+                {% for dado in metodos_extras %}
+                <tr class="linha-extra" style="display:none;">
+                    <td>{{ loop.index + metodos_principais|length }}</td>
+                    <td>{{ dado.tipo_pagamento }}</td>
+                    <td>{{ dado.total_transacoes }}</td>
+                    <td>R$ {{ dado.total_arrecadado | default(0) | round(2) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="botoes-acoes">
+            <button class="ver-mais active" onclick="mostrarMais('metodos-lista')">Ver Mais</button>
+            <button class="ver-menos" onclick="mostrarMenos('metodos-lista')">Ver Menos</button>
         </div>
     </section>
 </main>
 
-<script src="../static/js/relatorio_mais_vendidos.js"></script>
+<script src="../static/js/relatorio_mais_vendidos.js" defer></script>
+
 {% endblock %}

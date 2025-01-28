@@ -24,7 +24,7 @@ $(document).ready(() => {
 
         if (vendidoKilo == 1) {
             // Se for vendido por quilo, adicionar campos para gramas e quilos
-            quantidadeContainer.append(`
+            quantidadeContainer.append(`        
                 <label for="quantidade-quilos">Quantidade (Kg):</label>
                 <input type="number" id="quantidade-quilos" name="quantidade-quilos" min="0.01" step="0.01" placeholder="Kg">
                 <label for="quantidade-gramas">Quantidade (g):</label>
@@ -41,6 +41,16 @@ $(document).ready(() => {
     // Alterar a quantidade de campos ao escolher o produto
     $("#produto").on("change", atualizarCamposQuantidade);
 
+    // Exibir ou ocultar o campo do cliente dependendo do tipo de pagamento
+    $("#tipo-pagamento").on("change", () => {
+        const tipoPagamento = $("#tipo-pagamento").val();
+        if (tipoPagamento === "fiado") {
+            $(".nome-cliente-section").show();  // Exibir campo cliente
+        } else {
+            $(".nome-cliente-section").hide();  // Ocultar campo cliente
+        }
+    });
+
     // Função para adicionar o produto na tabela
     $("#adicionar-produto").on("click", () => {
         const produtoSelect = $("#produto");
@@ -50,8 +60,8 @@ $(document).ready(() => {
 
         const produtoId = produtoSelect.val();
         const produtoNome = produtoSelect.find(":selected").text();
-        const precoUnitario = parseFloat(produtoSelect.find(":selected").data("vendido-kilo") == 1 ?
-            produtoSelect.find(":selected").data("preco-kilo") :
+        const precoUnitario = parseFloat(produtoSelect.find(":selected").data("vendido-kilo") == 1 ? 
+            produtoSelect.find(":selected").data("preco-kilo") : 
             produtoSelect.find(":selected").data("preco"));
 
         let quantidade = 0;
@@ -80,7 +90,7 @@ $(document).ready(() => {
         const precoTotal = precoUnitario * quantidade;
         totalCompra += precoTotal;
 
-        const novaLinha = $(`
+        const novaLinha = $(`        
             <tr data-id="${produtoId}">
                 <td>${produtoNome}</td>
                 <td><input type="number" class="quantidade-editar" value="${quantidade}" min="1"></td>

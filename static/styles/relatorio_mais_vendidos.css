@@ -133,3 +133,113 @@ footer {
     outline: none;
     box-shadow: 0 0 5px #e53935; /* Tom de vermelho */
 }
+
+/* Estilo do select */
+#filtro-quantidade {
+    appearance: none; /* Remove o estilo padrão */
+    background-color: #4CAF50;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#filtro-quantidade:hover {
+    background-color: #45a049;
+}
+
+#filtro-quantidade:focus {
+    outline: none;
+    box-shadow: 0 0 8px #4CAF50;
+}
+
+/* Estilo das opções */
+#filtro-quantidade option {
+    background-color: white; /* Cor de fundo das opções */
+    color: black; /* Cor do texto das opções */
+    padding: 0.5rem; /* Espaçamento interno */
+    font-size: 1rem; /* Tamanho da fonte */
+    border: none; /* Remove a borda */
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Efeito de hover nas opções (em navegadores compatíveis) */
+#filtro-quantidade option:hover {
+    background-color: #f0f0f0; /* Cor de fundo ao passar o mouse */
+    color: #333; /* Cor do texto ao passar o mouse */
+}
+
+/* Ajustes visuais para navegadores que suportam estilos diferenciados em opções */
+#filtro-quantidade option:checked {
+    background-color: #4CAF50; /* Destaque para a opção selecionada */
+    color: white;
+    font-weight: bold;
+}
+
+/* Wrapper do select e ícone */
+.select-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-color: #4CAF50;
+    border-radius: 5px;
+    padding: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    width: 14rem; /* Define a largura desejada */
+    margin-left: auto; /* Empurra o select para o lado direito */
+    margin-top: 1rem; /* Dá um espaço abaixo do título */
+}
+
+.select-wrapper:hover {
+    background-color: #45a049;
+}
+
+.select-wrapper:focus-within {
+    box-shadow: 0 0 8px #4CAF50;
+}
+
+/* Ícone dentro do wrapper */
+.select-wrapper .material-symbols-outlined {
+    font-size: 1.5rem;
+    color: white;
+    margin-right: 0.5rem;
+}
+
+/* Select estilizado */
+.select-wrapper select {
+    appearance: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    width: 100%;
+    cursor: pointer;
+    padding: 0.5rem 0;
+}
+
+.select-wrapper select:focus {
+    outline: none;
+}
+
+/* Estilo das opções */
+.select-wrapper select option {
+    background-color: white;
+    color: black;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.select-wrapper select option:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}

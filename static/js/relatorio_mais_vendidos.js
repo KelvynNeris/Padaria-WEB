@@ -1,18 +1,21 @@
 document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.ver-mais').forEach((botao) => botao.classList.add('active'));
+    // Inicialmente, o botão "Ver Mais" deve estar ativo
+    document.querySelectorAll('.ver-mais').forEach((botao) => {
+        botao.classList.add('active');
+    });
 });
 
-function mostrarMais(idTabela, dadosExtras) {
+function mostrarMais(idTabela) {
     const tabela = document.getElementById(idTabela);
-    dadosExtras.forEach((dado, index) => {
-        const novaLinha = document.createElement("tr");
-        novaLinha.classList.add("linha-extra");
-        novaLinha.innerHTML = `
-            <td>${index + 4}</td>
-            <td>${dado.produto || dado.categoria}</td>
-            <td>${dado.quantidade}</td>
-        `;
-        tabela.appendChild(novaLinha);
+    const tbody = tabela.querySelector('tbody');
+    const linhasExtras = tabela.querySelectorAll('.linha-extra');
+
+    // Exibe o tbody e as linhas extras ocultas
+    if (tbody) {
+        tbody.style.display = 'table-row-group';  // Exibe o tbody
+    }
+    linhasExtras.forEach((linha) => {
+        linha.style.display = 'table-row';  // Exibe as linhas extras
     });
 
     alternarBotoes(idTabela, 'ver-mais', 'ver-menos');
@@ -20,8 +23,16 @@ function mostrarMais(idTabela, dadosExtras) {
 
 function mostrarMenos(idTabela) {
     const tabela = document.getElementById(idTabela);
-    const linhasExtras = tabela.querySelectorAll(".linha-extra");
-    linhasExtras.forEach((linha) => linha.remove());
+    const tbody = tabela.querySelector('tbody');
+    const linhasExtras = tabela.querySelectorAll('.linha-extra');
+
+    // Oculta as linhas extras e o tbody
+    if (tbody) {
+        tbody.style.display = 'none';  // Esconde o tbody
+    }
+    linhasExtras.forEach((linha) => {
+        linha.style.display = 'none';  // Esconde as linhas extras
+    });
 
     alternarBotoes(idTabela, 'ver-menos', 'ver-mais');
 }
@@ -42,6 +53,3 @@ function alternarBotoes(idTabela, esconderClasse, mostrarClasse) {
         console.error('Elemento não encontrado');
     }
 }
-
-// Inicia o "Ver Mais" como visível
-document.querySelectorAll('.ver-mais').forEach((botao) => botao.classList.add('active'));

@@ -96,6 +96,7 @@ CREATE TABLE tb_vendas (
     total DECIMAL(10,2) NOT NULL,
     data_venda TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     id_cliente INT DEFAULT NULL,
+    pagamento TEXT,
     FOREIGN KEY (id_usuario) REFERENCES tb_usuarios(id_usuario) ON DELETE CASCADE,
     FOREIGN KEY (id_cliente) REFERENCES tb_clientes_fiado(id_cliente) ON DELETE SET NULL
 );

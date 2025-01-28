@@ -621,23 +621,24 @@ class Usuario:
         """
         return sum(item['quantidade'] * item['preco_unitario'] for item in itens)
 
-    def inserir_venda(self, id_usuario, total_venda, id_cliente=None):
+    def inserir_venda(self, id_usuario, total_venda, pagamento, id_cliente=None):
         """
         Insere uma venda no banco de dados e retorna o ID gerado.
         :param id_usuario: ID do usuário que realizou a venda.
         :param total_venda: Valor total da venda.
+        :param pagamento: Tipo de pagamento (ex: 'dinheiro', 'cartão', 'fiado').
         :param id_cliente: ID do cliente (opcional).
         :return: ID da venda gerado.
         """
         try:
             sql_venda = """
-                INSERT INTO tb_vendas (id_usuario, total, id_cliente) 
-                VALUES (%s, %s, %s)
+                INSERT INTO tb_vendas (id_usuario, total, pagamento, id_cliente) 
+                VALUES (%s, %s, %s, %s)
             """
             mydb = Conexao.conectar()  # Conecta ao banco de dados
             mycursor = mydb.cursor()
             
-            mycursor.execute(sql_venda, (id_usuario, total_venda, id_cliente))
+            mycursor.execute(sql_venda, (id_usuario, total_venda, pagamento, id_cliente))
             id_venda = mycursor.lastrowid  # Obtém o último ID inserido
             
             mydb.commit()  # Confirma a transação
@@ -650,6 +651,66 @@ class Usuario:
             raise
 
 
+    def atualizar_estoque(self, itens):
+        """
+        Atualiza o estoque no banco de dados com base nos itens vendidos.
+        :param itens: Lista de itens contendo id_produto e quantidade.
+        """
+        try:
+            sql_buscar_estoque = """
+                SELECT quantidade_estoque, quantidade_estoque_kilos, vendido_por_kilo 
+                FROM tb_produtos 
+                WHERE id_produto = %s
+            """
+            sql_atualizar_estoque = """
+                UPDATE tb_produtos
+                SET 
+                    quantidade_estoque = CASE
+                        WHEN vendido_por_kilo = FALSE THEN quantidade_estoque - %s
+                        ELSE quantidade_estoque
+                    END,
+                    quantidade_estoque_kilos = CASE
+                        WHEN vendido_por_kilo = TRUE THEN quantidade_estoque_kilos - %s
+                        ELSE quantidade_estoque_kilos
+                    END
+                WHERE id_produto = %s
+            """
+            mydb = Conexao.conectar()
+            mycursor = mydb.cursor()
+
+            for item in itens:
+                id_produto = item['id_produto']  # ID do produto
+                quantidade = item['quantidade']  # Quantidade vendida (em unidades ou quilos)
+
+                # Buscar informações do estoque e tipo de venda do produto
+                mycursor.execute(sql_buscar_estoque, (id_produto,))
+                resultado = mycursor.fetchone()
+
+                if resultado is None:
+                    raise Exception(f"Produto com ID {id_produto} não encontrado.")
+
+                quantidade_estoque, quantidade_estoque_kilos, vendido_por_kilo = resultado
+
+                # Verificar disponibilidade do produto
+                if not vendido_por_kilo and quantidade_estoque < quantidade:
+                    raise Exception(f"Produto com ID {id_produto} está indisponível para a quantidade solicitada.")
+                if vendido_por_kilo and quantidade_estoque_kilos < quantidade:
+                    raise Exception(f"Produto com ID {id_produto} está indisponível para a quantidade solicitada.")
+
+                # Para produtos vendidos por unidade, a quantidade em quilos será 0 e vice-versa
+                quantidade_unidade = quantidade if not vendido_por_kilo else 0
+                quantidade_kilos = quantidade if vendido_por_kilo else 0
+
+                # Atualizar estoque
+                mycursor.execute(sql_atualizar_estoque, (quantidade_unidade, quantidade_kilos, id_produto))
+
+            mydb.commit()
+            mycursor.close()
+            mydb.close()
+
+        except Exception as e:
+            print(f"Erro ao atualizar estoque: {e}")
+            raise
 
     def inserir_itens_venda(self, id_venda, itens):
         """
@@ -679,50 +740,88 @@ class Usuario:
         mydb = Conexao.conectar()  # Conecta ao banco de dados
         mycursor = mydb.cursor()
 
-        # Consulta SQL para obter os produtos mais vendidos
-        sql = """
-            SELECT 
-                p.nome, 
-                SUM(i.quantidade) AS total_vendido
-            FROM 
-                tb_itens_venda i
-            JOIN 
-                tb_produtos p ON i.id_produto = p.id_produto
-            GROUP BY 
-                p.id_produto
-            ORDER BY 
-                total_vendido DESC;
-        """
+        try:
+            # Consulta SQL para obter os produtos mais vendidos por quantidade
+            sql_1 = """
+                SELECT 
+                    p.nome, 
+                    SUM(i.quantidade) AS total_vendido,
+                    SUM(i.quantidade * i.preco_unitario) AS total_arrecadado
+                FROM 
+                    tb_itens_venda i
+                JOIN 
+                    tb_produtos p ON i.id_produto = p.id_produto
+                GROUP BY 
+                    p.id_produto
+                ORDER BY 
+                    total_vendido DESC;
+            """
 
-        # Executa a consulta
-        mycursor.execute(sql)
+            # Consulta SQL para obter os produtos mais vendidos por total arrecadado
+            sql_2 = """
+                SELECT 
+                    p.nome, 
+                    SUM(i.quantidade) AS total_vendido,
+                    SUM(i.quantidade * i.preco_unitario) AS total_arrecadado
+                FROM 
+                    tb_itens_venda i
+                JOIN 
+                    tb_produtos p ON i.id_produto = p.id_produto
+                GROUP BY 
+                    p.id_produto
+                ORDER BY 
+                    total_arrecadado DESC;
+            """
 
-        # Obtém todos os resultados
-        resultados = mycursor.fetchall()
+            # Executa a primeira consulta (ordenada por total vendido)
+            mycursor.execute(sql_1)
+            resultados_1 = mycursor.fetchall()
 
-        lista_mais_vendidos_produtos = [
-            {
-                'nome': vendidos_produtos[0],
-                'total': vendidos_produtos[1],
-            }
-            for vendidos_produtos in resultados
-        ]
+            # Executa a segunda consulta (ordenada por total arrecadado)
+            mycursor.execute(sql_2)
+            resultados_2 = mycursor.fetchall()
 
-        # Fecha o cursor e a conexão
-        mycursor.close()
-        mydb.close()
+            # Prepara os resultados para a quantidade vendida
+            lista_mais_vendidos_produtos_quantidade = [
+                {
+                    'nome': produto[0],
+                    'total_vendido': produto[1],
+                    'total_arrecadado': produto[2]
+                }
+                for produto in resultados_1
+            ]
 
-        return lista_mais_vendidos_produtos
-    
+            # Prepara os resultados para o total arrecadado
+            lista_mais_vendidos_produtos_arrecadado = [
+                {
+                    'nome': produto[0],
+                    'total_vendido': produto[1],
+                    'total_arrecadado': produto[2]
+                }
+                for produto in resultados_2
+            ]
+
+            return lista_mais_vendidos_produtos_quantidade, lista_mais_vendidos_produtos_arrecadado
+
+        except Exception as e:
+            print(f"Erro ao gerar relatório de produtos mais vendidos: {e}")
+            return [], []
+
+        finally:
+            # Fecha o cursor e a conexão
+            mycursor.close()
+            mydb.close()
+
     def relatorio_mais_vendidos_categorias(self):
         mydb = Conexao.conectar()  # Conecta ao banco de dados
         mycursor = mydb.cursor()
 
-        # Consulta SQL para obter as categorias mais vendidas
-        sql = """
+        # Consulta SQL para obter as categorias mais vendidas por quantidade
+        sql_1 = """
             SELECT 
                 c.nome AS nome_categoria,
-                SUM(i.quantidade) AS total_vendido
+                SUM(i.quantidade) AS total_vendido,
+                SUM(i.quantidade * i.preco_unitario) AS total_arrecadado
             FROM 
                 tb_itens_venda i
             JOIN 
@@ -735,23 +834,138 @@ class Usuario:
                 total_vendido DESC;
         """
 
-        # Executa a consulta
-        mycursor.execute(sql)
+        # Consulta SQL para obter as categorias mais vendidas por total arrecadado
+        sql_2 = """
+            SELECT 
+                c.nome AS nome_categoria,
+                SUM(i.quantidade) AS total_vendido,
+                SUM(i.quantidade * i.preco_unitario) AS total_arrecadado
+            FROM 
+                tb_itens_venda i
+            JOIN 
+                tb_produtos p ON i.id_produto = p.id_produto
+            JOIN
+                tb_categorias c ON p.id_categoria = c.id_categoria
+            GROUP BY 
+                c.id_categoria
+            ORDER BY 
+                total_arrecadado DESC;
+        """
 
-        # Obtém todos os resultados
-        resultados = mycursor.fetchall()
+        try:
+            # Executa a primeira consulta
+            mycursor.execute(sql_1)
+            resultados_1 = mycursor.fetchall()
 
-        # Prepara os resultados
-        lista_mais_vendidos_categorias = [
-            {
-                'nome_categoria': vendidos_categorias[0],
-                'total_vendido': vendidos_categorias[1],
-            }
-            for vendidos_categorias in resultados
-        ]
+            # Executa a segunda consulta
+            mycursor.execute(sql_2)
+            resultados_2 = mycursor.fetchall()
 
-        # Fecha o cursor e a conexão
-        mycursor.close()
-        mydb.close()
+            # Prepara os resultados
+            lista_mais_vendidos_categorias = [
+                {
+                    'nome_categoria': vendidos_categorias[0],
+                    'total_vendido': vendidos_categorias[1],
+                    'total_arrecadado': vendidos_categorias[2]
+                }
+                for vendidos_categorias in resultados_1
+            ]
 
-        return lista_mais_vendidos_categorias
+            lista_mais_vendidos_categorias_arrecadado = [
+                {
+                    'nome_categoria': vendidos_categorias[0],
+                    'total_vendido': vendidos_categorias[1],
+                    'total_arrecadado': vendidos_categorias[2]
+                }
+                for vendidos_categorias in resultados_2
+            ]
+
+            # Fecha o cursor e a conexão
+            mycursor.close()
+            mydb.close()
+
+            return lista_mais_vendidos_categorias, lista_mais_vendidos_categorias_arrecadado
+
+        except Exception as e:
+            print("Erro ao executar as consultas:", e)
+            # Fecha o cursor e a conexão em caso de erro
+            mycursor.close()
+            mydb.close()
+            return None, None
+    
+    def relatorio_metodos_pagamento_mais_usados(self):
+        """
+        Gera um relatório dos métodos de pagamento mais utilizados.
+        Retorna duas listas de dicionários: uma com o tipo de pagamento, a quantidade de transações e o total arrecadado ordenado por transações,
+        e outra ordenada por total arrecadado.
+        """
+        mydb = Conexao.conectar()  # Conecta ao banco de dados
+        mycursor = mydb.cursor()
+
+        try:
+            # Consulta SQL para obter os métodos de pagamento mais utilizados por quantidade de transações
+            sql_1 = """
+                SELECT 
+                    v.pagamento AS tipo_pagamento,
+                    COUNT(v.id_venda) AS total_transacoes,
+                    SUM(v.total) AS total_arrecadado
+                FROM 
+                    tb_vendas v
+                GROUP BY 
+                    v.pagamento
+                ORDER BY 
+                    total_transacoes DESC;
+            """
+
+            # Consulta SQL para obter os métodos de pagamento mais utilizados por total arrecadado
+            sql_2 = """
+                SELECT 
+                    v.pagamento AS tipo_pagamento,
+                    COUNT(v.id_venda) AS total_transacoes,
+                    SUM(v.total) AS total_arrecadado
+                FROM 
+                    tb_vendas v
+                GROUP BY 
+                    v.pagamento
+                ORDER BY 
+                    total_arrecadado DESC;
+            """
+
+            # Executa a primeira consulta (ordenada por transações)
+            mycursor.execute(sql_1)
+            resultados_1 = mycursor.fetchall()
+
+            # Executa a segunda consulta (ordenada por total arrecadado)
+            mycursor.execute(sql_2)
+            resultados_2 = mycursor.fetchall()
+
+            # Formata os resultados em uma lista de dicionários para a quantidade de transações
+            lista_metodos_pagamento_transacoes = [
+                {
+                    'tipo_pagamento': metodo[0],
+                    'total_transacoes': metodo[1],
+                    'total_arrecadado': float(metodo[2]),  # Converte para float para facilitar formatação
+                }
+                for metodo in resultados_1
+            ]
+
+            # Formata os resultados em uma lista de dicionários para o total arrecadado
+            lista_metodos_pagamento_arrecadado = [
+                {
+                    'tipo_pagamento': metodo[0],
+                    'total_transacoes': metodo[1],
+                    'total_arrecadado': float(metodo[2]),  # Converte para float para facilitar formatação
+                }
+                for metodo in resultados_2
+            ]
+
+            return lista_metodos_pagamento_transacoes, lista_metodos_pagamento_arrecadado
+
+        except Exception as e:
+            print(f"Erro ao gerar relatório de métodos de pagamento: {e}")
+            return [], []
+
+        finally:
+            # Fecha o cursor e a conexão
+            mycursor.close()
+            mydb.close()
