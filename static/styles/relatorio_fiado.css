@@ -116,7 +116,7 @@ input[type="number"]:focus {
 }
 
 /* Estilização do botão */
-button[type="submit"] {
+button {
     padding: 0.8rem 1.5rem;
     font-size: 1rem;
     background-color: #ccc; /* Cor de fundo discreta */
@@ -128,11 +128,11 @@ button[type="submit"] {
     margin-left: 10px; /* Espaço entre o input e o botão */
 }
 
-button[type="submit"]:hover {
+button:hover {
     background-color: #bbb;
 }
 
-button[type="submit"]:active {
+button:active {
     background-color: #999;
 }
 
