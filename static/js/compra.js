@@ -44,7 +44,7 @@ $(document).ready(() => {
     // Exibir ou ocultar o campo do cliente dependendo do tipo de pagamento
     $("#tipo-pagamento").on("change", () => {
         const tipoPagamento = $("#tipo-pagamento").val();
-        if (tipoPagamento === "fiado") {
+        if (tipoPagamento === "Fiado") {
             $(".nome-cliente-section").show();  // Exibir campo cliente
         } else {
             $(".nome-cliente-section").hide();  // Ocultar campo cliente

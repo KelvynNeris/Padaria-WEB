@@ -7,6 +7,7 @@ import email.message
 from dotenv import load_dotenv
 from usuario import Usuario  # Substitua pelo seu modelo de usuário
 import re
+from collections import defaultdict
 
 # Carregar variáveis de ambiente
 load_dotenv()
@@ -601,16 +602,17 @@ def finalizar_compra():
         # Validar dados básicos
         if not tipo_pagamento:
             return jsonify({'erro': 'O tipo de pagamento é obrigatório.'}), 400
-        if tipo_pagamento == 'fiado' and not id_cliente:
+        if tipo_pagamento == 'Fiado' and not id_cliente:
             return jsonify({'erro': 'O ID do cliente é obrigatório para vendas fiado.'}), 400
 
         # Buscar o nome do cliente pelo ID (se necessário)
         nome_cliente = None
-        if tipo_pagamento == 'fiado':
+        if tipo_pagamento == 'Fiado':
             cliente = usuario.buscar_cliente_por_id(id_cliente)
             if not cliente:
                 return jsonify({'erro': f'Cliente com ID {id_cliente} não encontrado.'}), 400
             nome_cliente = cliente.get('nome')  # Apenas para referência ou log, se necessário
+            saldo_atual = cliente.get('saldo_em_aberto', 0)
 
         # Calcular o total da venda
         total_venda = usuario.calcular_total_venda(itens)
@@ -624,6 +626,11 @@ def finalizar_compra():
         # Atualizar o estoque
         usuario.atualizar_estoque(itens)
 
+        # Se for fiado, atualizar o saldo do cliente
+        if tipo_pagamento == 'Fiado':
+            novo_saldo = saldo_atual + total_venda
+            usuario.atualizar_saldo_cliente(id_cliente, novo_saldo)
+
         return jsonify({'mensagem': 'Venda registrada com sucesso!', 'id_venda': id_venda}), 201
     except Exception as e:
         print(f"Erro ao finalizar compra: {e}")
@@ -632,7 +639,7 @@ def finalizar_compra():
 @app.route('/relatorio_mais_vendidos', methods=['GET'])
 def relatorio_mais_vendidos():
     usuario = Usuario()
-    
+
     # Obtém os filtros da URL
     filtro = request.args.get('filtro', 'quantidade')
     data_inicial = request.args.get('data_inicial', None)
@@ -654,17 +661,58 @@ def relatorio_mais_vendidos():
         categorias = [c for c in categorias if usuario.dentro_do_periodo(c['data'], data_inicial, data_final)]
         metodos = [m for m in metodos if usuario.dentro_do_periodo(m['data'], data_inicial, data_final)]
 
+    # Agrupar produtos, somando as quantidades e arrecadados
+    produtos_agrupados = defaultdict(lambda: {'total_vendido': 0, 'total_arrecadado': 0})
+    for p in produtos:
+        # Use os campos 'total_vendido' e 'total_arrecadado' que já existem
+        produtos_agrupados[p['nome']]['total_vendido'] += p['total_vendido']
+        produtos_agrupados[p['nome']]['total_arrecadado'] += p['total_arrecadado']
+
+    produtos_agrupados = [{'nome': nome, **dados} for nome, dados in produtos_agrupados.items()]
+
+    # Agrupar categorias, somando as quantidades e arrecadados
+    categorias_agrupadas = defaultdict(lambda: {'total_vendido': 0, 'total_arrecadado': 0})
+    for c in categorias:
+        # Use os campos 'total_vendido' e 'total_arrecadado' que já existem
+        categorias_agrupadas[c['nome_categoria']]['total_vendido'] += c['total_vendido']
+        categorias_agrupadas[c['nome_categoria']]['total_arrecadado'] += c['total_arrecadado']
+
+    categorias_agrupadas = [{'nome_categoria': nome, **dados} for nome, dados in categorias_agrupadas.items()]
+
+    # Agrupar métodos de pagamento, somando as transações e arrecadados
+    metodos_agrupados = defaultdict(lambda: {'total_transacoes': 0, 'total_arrecadado': 0})
+    for m in metodos:
+        # Use os campos 'total_transacoes' e 'total_arrecadado' já existentes
+        metodos_agrupados[m['tipo_pagamento']]['total_transacoes'] += m['total_transacoes']
+        metodos_agrupados[m['tipo_pagamento']]['total_arrecadado'] += m['total_arrecadado']
+
+    metodos_agrupados = [{'tipo_pagamento': tipo, **dados} for tipo, dados in metodos_agrupados.items()]
+
     return render_template(
         'relatorio_mais_vendidos.html',
         filtro=filtro,
         data_inicial=data_inicial,
         data_final=data_final,
-        produtos_principais=produtos[:3],
-        produtos_extras=produtos[3:],
-        categorias_principais=categorias[:3],
-        categorias_extras=categorias[3:],
-        metodos_principais=metodos[:3],
-        metodos_extras=metodos[3:]
+        produtos_principais=produtos_agrupados[:3],
+        produtos_extras=produtos_agrupados[3:],
+        categorias_principais=categorias_agrupadas[:3],
+        categorias_extras=categorias_agrupadas[3:],
+        metodos_principais=metodos_agrupados[:3],
+        metodos_extras=metodos_agrupados[3:]
+    )
+
+@app.route('/relatorio_fiado')
+def relatorio_fiado():
+    # Chama a função da classe Usuario
+    usuario = Usuario()
+    relatorio = usuario.relatorio_fiado()
+
+    return render_template(
+        'relatorio_fiado.html',
+        transacoes=relatorio['transacoes'],
+        total_fiado=relatorio['total_fiado'],
+        total_pago=relatorio['total_pago'],
+        total_pendente=relatorio['total_pendente']
     )
 
 if __name__ == "__main__":

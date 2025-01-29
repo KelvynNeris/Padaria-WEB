@@ -603,12 +603,12 @@ class Usuario:
             mydb = Conexao.conectar()  # Conecta ao banco de dados
             with mydb.cursor() as mycursor:
                 # Query para buscar cliente pelo ID
-                sql = "SELECT id_cliente, nome FROM tb_clientes_fiado WHERE id_cliente = %s LIMIT 1"
+                sql = "SELECT id_cliente, nome, saldo_em_aberto FROM tb_clientes_fiado WHERE id_cliente = %s LIMIT 1"
                 mycursor.execute(sql, (id_cliente,))
                 resultado = mycursor.fetchone()
 
                 # Retorna um dicionário com os dados do cliente ou None
-                return {"id_cliente": resultado[0], "nome": resultado[1]} if resultado else None
+                return {"id_cliente": resultado[0], "nome": resultado[1], "saldo_em_aberto": resultado[2]} if resultado else None
         except Exception as e:
             print(f"Erro ao buscar cliente por ID: {e}")
             raise
@@ -1013,3 +1013,69 @@ class Usuario:
                 return False
 
         return True
+
+    def atualizar_saldo_cliente(self, id_cliente, novo_saldo):
+        """
+        Atualiza o saldo em aberto do cliente fiado no banco de dados.
+        :param id_cliente: ID do cliente cujo saldo será atualizado.
+        :param novo_saldo: Novo saldo a ser registrado no banco.
+        """
+        try:
+            mydb = Conexao.conectar()  # Conecta ao banco de dados
+            with mydb.cursor() as mycursor:
+                sql = "UPDATE tb_clientes_fiado SET saldo_em_aberto = %s WHERE id_cliente = %s"
+                mycursor.execute(sql, (novo_saldo, id_cliente))
+                mydb.commit()  # Confirma a alteração no banco
+        except Exception as e:
+            print(f"Erro ao atualizar saldo do cliente ID {id_cliente}: {e}")
+            raise
+        finally:
+            mydb.close()
+
+    def relatorio_fiado(self):
+        """
+        Recupera todas as transações fiadas de clientes e calcula o total de fiado, total pago e total pendente.
+        :return: Dicionário com a lista de transações e os totais.
+        """
+        try:
+            mydb = Conexao.conectar()  # Conecta ao banco de dados
+            with mydb.cursor() as mycursor:
+                # Consulta SQL para buscar transações fiadas
+                sql = """
+                    SELECT 
+                        c.nome AS cliente, 
+                        t.data_venda AS data, 
+                        t.total AS valor, 
+                        t.status_pagamento AS status
+                    FROM 
+                        tb_vendas t
+                    JOIN 
+                        tb_clientes_fiado c ON t.id_cliente = c.id_cliente
+                    WHERE 
+                        t.pagamento = 'Fiado'
+                """
+                mycursor.execute(sql)
+                transacoes = mycursor.fetchall()
+
+                # Calcula os totais
+                total_fiado = sum(t[2] for t in transacoes)  # Soma os valores das transações
+                total_pago = sum(t[2] for t in transacoes if t[3] == 'Pago')  # Soma apenas os pagos
+                total_pendente = total_fiado - total_pago  # O restante é pendente
+
+                # Converte para o formato esperado na view
+                transacoes_formatted = [
+                    {"cliente": t[0], "data": t[1], "valor": t[2], "status": t[3]} 
+                    for t in transacoes
+                ]
+
+                return {
+                    "transacoes": transacoes_formatted,
+                    "total_fiado": total_fiado,
+                    "total_pago": total_pago,
+                    "total_pendente": total_pendente
+                }
+        except Exception as e:
+            print(f"Erro ao gerar relatório de fiado: {e}")
+            raise
+        finally:
+            mydb.close()

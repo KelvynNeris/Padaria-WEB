@@ -1,0 +1,52 @@
+{% extends "modelo.html" %}
+{% block conteudo %}
+<link rel="stylesheet" href="../static/styles/relatorio_fiado.css">
+
+<header class="relatorio-header">
+    <h1>Relatório de Fiado</h1>
+</header>
+
+<main class="relatorio-main">
+    <section class="resumo-fiado">
+        <div class="card">
+            <h3>Total Fiado</h3>
+            <p>R$ {{ total_fiado | round(2) }}</p>
+        </div>
+        <div class="card">
+            <h3>Pago</h3>
+            <p>R$ {{ total_pago | round(2) }}</p>
+        </div>
+        <div class="card pendente">
+            <h3>Pendente</h3>
+            <p>R$ {{ total_pendente | round(2) }}</p>
+        </div>
+    </section>
+
+    <section class="tabela-fiado">
+        <h2>Detalhes das Transações</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Data</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transacao in transacoes %}
+                <tr>
+                    <td>{{ transacao.cliente }}</td>
+                    <td>{{ transacao.data }}</td>
+                    <td>R$ {{ transacao.valor | round(2) }}</td>
+                    <td class="{% if transacao.status == 'Pendente' %}pendente{% else %}pago{% endif %}">
+                        {{ transacao.status }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</main>
+
+{% endblock %}

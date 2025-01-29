@@ -1,6 +1,7 @@
 {% extends "modelo.html" %}
 {% block conteudo %}
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=filter_alt" />
+<link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=filter_alt" />
 <link rel="stylesheet" href="../static/styles/relatorio_mais_vendidos.css">
 
 <header class="relatorio-header">
@@ -14,11 +15,12 @@
         <div class="select-wrapper">
             <span class="material-symbols-outlined">filter_alt</span>
             <select id="filtro-quantidade" onchange="atualizarFiltros()">
-                <option value="quantidade" {% if filtro == 'quantidade' %}selected{% endif %}>Quantidade Vendida</option>
-                <option value="total_arrecadado" {% if filtro == 'total_arrecadado' %}selected{% endif %}>Total Arrecadado</option>
+                <option value="quantidade" {% if filtro=='quantidade' %}selected{% endif %}>Quantidade Vendida</option>
+                <option value="total_arrecadado" {% if filtro=='total_arrecadado' %}selected{% endif %}>Total Arrecadado
+                </option>
             </select>
         </div>
-    
+
         <!-- Filtro por Data -->
         <form id="form-filtros" method="GET" action="/relatorio_mais_vendidos">
             <label for="data-inicial">De:</label>
@@ -28,7 +30,7 @@
             <input type="hidden" id="input-filtro" name="filtro" value="{{ filtro }}">
             <button type="submit" class="btn-filtrar">Filtrar</button>
         </form>
-    </div>    
+    </div>
 
     <!-- Exibe as listas baseadas no filtro selecionado -->
     <section class="relatorio-section">
@@ -119,7 +121,12 @@
                 {% for metodo in metodos_principais %}
                 <tr>
                     <td>{{ loop.index }}</td>
-                    <td>{{ metodo.tipo_pagamento }}</td>
+                    <td> {% if metodo.tipo_pagamento == "Fiado" %}
+                        <a href="{{ url_for('relatorio_fiado') }}" class="link-fiado">Fiado</a>
+                        {% else %}
+                        {{ metodo.tipo_pagamento }}
+                        {% endif %}
+                    </td>
                     <td>{{ metodo.total_transacoes }}</td>
                     <td>R$ {{ metodo.total_arrecadado | round(2) }}</td>
                 </tr>
@@ -127,7 +134,13 @@
                 {% for dado in metodos_extras %}
                 <tr class="linha-extra" style="display:none;">
                     <td>{{ loop.index + metodos_principais|length }}</td>
-                    <td>{{ dado.tipo_pagamento }}</td>
+                    <td>
+                        {% if dado.tipo_pagamento == "Fiado" %}
+                        <a href="{{ url_for('relatorio_fiado') }}" class="link-fiado">Fiado</a>
+                        {% else %}
+                        {{ dado.tipo_pagamento }}
+                        {% endif %}
+                    </td>
                     <td>{{ dado.total_transacoes }}</td>
                     <td>R$ {{ dado.total_arrecadado | default(0) | round(2) }}</td>
                 </tr>
