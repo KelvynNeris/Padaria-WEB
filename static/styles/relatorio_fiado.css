@@ -81,7 +81,7 @@ th, td {
     border-bottom: 1px solid #ddd;
 }
 
-tr:hover {
+.tr:hover {
     background-color: #f1f1f1;
 }
 
@@ -93,4 +93,51 @@ tr:hover {
 .pago {
     color: green;
     font-weight: bold;
+}
+
+/* Estilização do input */
+input[type="number"] {
+    width: calc(100% - 120px);  /* Deixa o input ocupar 100% menos a largura do botão */
+    padding: 0.8rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    color: #333;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+/* Foco no input */
+input[type="number"]:focus {
+    border-color: #4CAF50;
+    background-color: #fff;
+    outline: none;
+}
+
+/* Estilização do botão */
+button[type="submit"] {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    background-color: #ccc; /* Cor de fundo discreta */
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-left: 10px; /* Espaço entre o input e o botão */
+}
+
+button[type="submit"]:hover {
+    background-color: #bbb;
+}
+
+button[type="submit"]:active {
+    background-color: #999;
+}
+
+/* Container para input e botão */
+.input-botao-container {
+    display: flex;
+    align-items: center;
 }

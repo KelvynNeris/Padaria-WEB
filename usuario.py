@@ -1040,13 +1040,15 @@ class Usuario:
         try:
             mydb = Conexao.conectar()  # Conecta ao banco de dados
             with mydb.cursor() as mycursor:
-                # Consulta SQL para buscar transações fiadas
+                # Consulta SQL para buscar transações fiadas com o id_venda
                 sql = """
                     SELECT 
                         c.nome AS cliente, 
                         t.data_venda AS data, 
                         t.total AS valor, 
-                        t.status_pagamento AS status
+                        t.status_pagamento AS status,
+                        t.id_venda AS id,  -- Adicionando o id da venda
+                        t.total_pago AS total
                     FROM 
                         tb_vendas t
                     JOIN 
@@ -1059,12 +1061,12 @@ class Usuario:
 
                 # Calcula os totais
                 total_fiado = sum(t[2] for t in transacoes)  # Soma os valores das transações
-                total_pago = sum(t[2] for t in transacoes if t[3] == 'Pago')  # Soma apenas os pagos
+                total_pago = sum(t[5] for t in transacoes if t[3])  # Soma apenas os pagos
                 total_pendente = total_fiado - total_pago  # O restante é pendente
 
                 # Converte para o formato esperado na view
                 transacoes_formatted = [
-                    {"cliente": t[0], "data": t[1], "valor": t[2], "status": t[3]} 
+                    {"cliente": t[0], "data": t[1], "valor": t[2], "status": t[3], "id": t[4], 'total': t[5]} 
                     for t in transacoes
                 ]
 
@@ -1077,5 +1079,58 @@ class Usuario:
         except Exception as e:
             print(f"Erro ao gerar relatório de fiado: {e}")
             raise
+        finally:
+            mydb.close()
+
+
+    def atualizar_pagamento(self, transacao_id, valor_pago):
+        try:
+            mydb = Conexao.conectar()
+            with mydb.cursor() as mycursor:
+                sql_select = """
+                    SELECT total, COALESCE(total_pago, 0)
+                    FROM tb_vendas
+                    WHERE id_venda = %s AND status_pagamento = 'Pendente'
+                """
+                mycursor.execute(sql_select, (transacao_id,))
+                result = mycursor.fetchone()
+
+                if not result:
+                    print("Transação não encontrada ou já paga.")
+                    return {'success': False, 'message': 'Transação não encontrada ou já paga.'}
+
+                valor_compra = float(result[0])
+                total_pago = float(result[1])  # Garante que não seja None
+                total_pagamento = total_pago + float(valor_pago)
+
+                print(f"Total compra: {valor_compra}, Já pago: {total_pago}, Agora pago: {valor_pago}, Total: {total_pagamento}")
+
+                if total_pagamento < valor_compra:
+                    sql_update = """
+                        UPDATE tb_vendas 
+                        SET total_pago = %s
+                        WHERE id_venda = %s AND status_pagamento = 'Pendente'
+                    """
+                    mycursor.execute(sql_update, (total_pagamento, transacao_id))
+                    mydb.commit()
+                    return {'success': True, 'message': 'Pagamento parcial registrado.'}
+
+                elif total_pagamento == valor_compra:
+                    sql_update = """
+                        UPDATE tb_vendas
+                        SET status_pagamento = 'Pago', total_pago = %s
+                        WHERE id_venda = %s AND status_pagamento = 'Pendente'
+                    """
+                    mycursor.execute(sql_update, (total_pagamento, transacao_id))
+                    mydb.commit()
+                    return {'success': True, 'message': 'Pagamento completo registrado.'}
+
+                else:
+                    return {'success': False, 'message': 'O valor pago excede o total da compra.'}
+
+        except Exception as e:
+            print(f"Erro ao atualizar pagamento: {e}")
+            return {'success': False, 'message': f'Erro ao atualizar pagamento: {str(e)}'}
+
         finally:
             mydb.close()

@@ -31,16 +31,27 @@
                     <th>Data</th>
                     <th>Valor</th>
                     <th>Status</th>
+                    <th>Pagamento</th>
                 </tr>
             </thead>
             <tbody>
                 {% for transacao in transacoes %}
-                <tr>
+                <tr class="tr">
                     <td>{{ transacao.cliente }}</td>
                     <td>{{ transacao.data }}</td>
                     <td>R$ {{ transacao.valor | round(2) }}</td>
                     <td class="{% if transacao.status == 'Pendente' %}pendente{% else %}pago{% endif %}">
                         {{ transacao.status }}
+                    </td>
+                    <td>
+                        {% if transacao.status == 'Pendente' %}
+                        <div class="input-botao-container">
+                            <!-- O id do campo input agora é 'valor_pago_{{ transacao.id }}' -->
+                            <input type="number" id="valor_pago_{{ transacao.id }}" name="valor_pago" step="0.01" min="0"
+                                placeholder="Valor pago" required>
+                            <button type="button" onclick="descontar({{ transacao.id }})">Descontar</button>
+                        </div>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -48,5 +59,8 @@
         </table>
     </section>
 </main>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="../static/js/relatorio_fiado.js" defer></script>
 
 {% endblock %}

@@ -715,5 +715,19 @@ def relatorio_fiado():
         total_pendente=relatorio['total_pendente']
     )
 
+@app.route('/atualizar_pagamento/<int:transacao_id>', methods=['POST'])
+def atualizar_pagamento(transacao_id):
+    try:
+        valor_pago = request.json.get('valor_pago')  # Agora usamos .json para pegar os dados
+        if not valor_pago:
+            return jsonify({'success': False, 'message': 'Valor pago não fornecido ou inválido'})
+
+        usuario = Usuario()
+        result = usuario.atualizar_pagamento(transacao_id, valor_pago)
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Erro ao atualizar pagamento: {str(e)}'})
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8080)  # Define o host como localhost e a porta como 8080

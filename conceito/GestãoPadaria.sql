@@ -97,6 +97,7 @@ CREATE TABLE tb_vendas (
     data_venda TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     id_cliente INT DEFAULT NULL,
     pagamento TEXT,
+    total_pago DECIMAL(10,2) DEFAULT 0.00,
     status_pagamento ENUM('Pendente', 'Pago') DEFAULT 'Pendente',
     FOREIGN KEY (id_usuario) REFERENCES tb_usuarios(id_usuario) ON DELETE CASCADE,
     FOREIGN KEY (id_cliente) REFERENCES tb_clientes_fiado(id_cliente) ON DELETE SET NULL
@@ -142,4 +143,4 @@ VALUES ('Administrador Master', 'adm@adm.com', 'a665a45920422f9d417e4867efdc4fb8
 INSERT INTO tb_clientes_fiado (nome, telefone, email, endereco, saldo_em_aberto)
 VALUES 
 ('João Silva', '11987654321', 'joao.silva@email.com', 'Rua das Flores, 123, São Paulo', 0.00),
-('Maria Souza', '11912345678', 'maria.souza@email.com', 'Avenida Central, 456, Araraquara', 0.00);
+('Maria Souza', '11912345678', 'maria.souza@email.com', 'Avenida Central, 456, Araraquara', 50.00);
