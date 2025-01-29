@@ -30,6 +30,7 @@
                     <th>Cliente</th>
                     <th>Data</th>
                     <th>Valor</th>
+                    <th>Pago</th>
                     <th>Status</th>
                     <th>Pagamento</th>
                 </tr>
@@ -40,6 +41,7 @@
                     <td>{{ transacao.cliente }}</td>
                     <td>{{ transacao.data }}</td>
                     <td>R$ {{ transacao.valor | round(2) }}</td>
+                    <td>R$ {{ transacao.total | round(2) }}</td>
                     <td class="{% if transacao.status == 'Pendente' %}pendente{% else %}pago{% endif %}">
                         {{ transacao.status }}
                     </td>
