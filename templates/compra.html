@@ -19,16 +19,6 @@
 </header>
 <main>
     <form id="form-compra">
-        <!-- Nome do cliente (exibido somente se o pagamento for fiado) -->
-        <section class="nome-cliente-section" style="display:none;">
-            <select id="cliente" name="cliente" style="width: 100%;">
-                <option value="" disabled selected>Selecione um cliente</option>
-                {% for registro in lista_clientes %}
-                <option value="{{ registro.id_cliente }}" data-saldo="{{ registro.saldo }}">{{ registro.nome }}</option>
-                {% endfor %}
-            </select>
-        </section>
-
         <!-- Adicionar produtos -->
         <section class="produtos-section">
             <h2>Produtos</h2>
@@ -87,6 +77,17 @@
                 <option value="Cartão">Cartão</option>
                 <option value="Pix">Pix</option>
                 <option value="Fiado">Fiado</option>
+            </select>
+        </section>
+
+        <!-- Nome do cliente (exibido somente se o pagamento for fiado) -->
+        <section class="nome-cliente-section" style="display:none;">
+            <label for="cliente">Cliente:</label>
+            <select id="cliente" name="cliente" style="width: 100%;">
+                <option value="" disabled selected>Selecione um cliente</option>
+                {% for registro in lista_clientes %}
+                <option value="{{ registro.id_cliente }}" data-saldo="{{ registro.saldo }}">{{ registro.nome }}</option>
+                {% endfor %}
             </select>
         </section>
 

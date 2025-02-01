@@ -1,5 +1,4 @@
 $(document).ready(() => {
-    // Inicializar Select2 nos campos
     $('#produto, #cliente').select2({
         placeholder: "Pesquise ou selecione",
         allowClear: true,
@@ -14,16 +13,14 @@ $(document).ready(() => {
         totalCompraEl.text(totalCompra.toFixed(2));
     };
 
-    // Atualizar o campo de quantidade baseado no tipo de produto
     const atualizarCamposQuantidade = () => {
         const produtoSelect = $("#produto");
         const vendidoKilo = produtoSelect.find(":selected").data("vendido-kilo");
 
         const quantidadeContainer = $("#quantidade-container");
-        quantidadeContainer.empty(); // Limpar campos de quantidade anteriores
+        quantidadeContainer.empty();
 
         if (vendidoKilo == 1) {
-            // Se for vendido por quilo, adicionar campos para gramas e quilos
             quantidadeContainer.append(`        
                 <label for="quantidade-quilos">Quantidade (Kg):</label>
                 <input type="number" id="quantidade-quilos" name="quantidade-quilos" min="0.01" step="0.01" placeholder="Kg">
@@ -31,48 +28,41 @@ $(document).ready(() => {
                 <input type="number" id="quantidade-gramas" name="quantidade-gramas" min="1" placeholder="g">
             `);
         } else {
-            // Caso contrário, manter o input atual de quantidade por unidade
             quantidadeContainer.append(`
-                <input type="number" id="quantidade" name="quantidade" min="1" placeholder="0">
+                <input type="number" id="quantidade" name="quantidade" min="1" step="1" placeholder="0">
             `);
         }
     };
 
-    // Alterar a quantidade de campos ao escolher o produto
     $("#produto").on("change", atualizarCamposQuantidade);
 
-    // Exibir ou ocultar o campo do cliente dependendo do tipo de pagamento
     $("#tipo-pagamento").on("change", () => {
         const tipoPagamento = $("#tipo-pagamento").val();
         if (tipoPagamento === "Fiado") {
-            $(".nome-cliente-section").show();  // Exibir campo cliente
+            $(".nome-cliente-section").show();
         } else {
-            $(".nome-cliente-section").hide();  // Ocultar campo cliente
+            $(".nome-cliente-section").hide();
         }
     });
 
-    // Função para adicionar o produto na tabela
     $("#adicionar-produto").on("click", () => {
         const produtoSelect = $("#produto");
-        const quantidadeInput = $("#quantidade");
-        const quantidadeQuilosInput = $("#quantidade-quilos");
-        const quantidadeGramasInput = $("#quantidade-gramas");
+        const vendidoKilo = produtoSelect.find(":selected").data("vendido-kilo") == 1;
 
         const produtoId = produtoSelect.val();
         const produtoNome = produtoSelect.find(":selected").text();
-        const precoUnitario = parseFloat(produtoSelect.find(":selected").data("vendido-kilo") == 1 ? 
+        const precoUnitario = parseFloat(vendidoKilo ? 
             produtoSelect.find(":selected").data("preco-kilo") : 
             produtoSelect.find(":selected").data("preco"));
 
         let quantidade = 0;
 
-        // Se for vendido por quilo, somar as quantidades de gramas e quilos
-        if (produtoSelect.find(":selected").data("vendido-kilo") == 1) {
-            const quantidadeQuilos = parseFloat(quantidadeQuilosInput.val()) || 0;
-            const quantidadeGramas = parseInt(quantidadeGramasInput.val()) || 0;
-            quantidade = quantidadeQuilos + (quantidadeGramas / 1000); // Convertendo gramas para quilos
+        if (vendidoKilo) {
+            const quantidadeQuilos = parseFloat($("#quantidade-quilos").val()) || 0;
+            const quantidadeGramas = parseInt($("#quantidade-gramas").val()) || 0;
+            quantidade = quantidadeQuilos + (quantidadeGramas / 1000);
         } else {
-            quantidade = parseInt(quantidadeInput.val());
+            quantidade = parseInt($("#quantidade").val()); // Garantindo número inteiro para unidade
         }
 
         if (!produtoId || isNaN(quantidade) || quantidade <= 0) {
@@ -80,7 +70,6 @@ $(document).ready(() => {
             return;
         }
 
-        // Verificar duplicação de produto
         const linhaExistente = tabelaProdutos.find(`tr[data-id="${produtoId}"]`);
         if (linhaExistente.length > 0) {
             alert("Produto já adicionado. Edite a quantidade diretamente na lista.");
@@ -93,8 +82,11 @@ $(document).ready(() => {
         const novaLinha = $(`        
             <tr data-id="${produtoId}">
                 <td>${produtoNome}</td>
-                <td><input type="number" class="quantidade-editar" value="${quantidade}" min="1"></td>
-                <td>R$ ${precoUnitario.toFixed(2)} Kg</td>
+                <td>
+                    <input type="number" class="quantidade-editar" value="${quantidade}" 
+                        min="1" step="${vendidoKilo ? '0.01' : '1'}">
+                </td>
+                <td>R$ ${precoUnitario.toFixed(2)} ${vendidoKilo ? "Kg" : "Un"}</td>
                 <td class="preco-total">R$ ${precoTotal.toFixed(2)}</td>
                 <td><button type="button" class="remover-produto">Remover</button></td>
             </tr>
@@ -103,11 +95,8 @@ $(document).ready(() => {
         tabelaProdutos.append(novaLinha);
         atualizarTotalCompra();
 
-        // Resetar campos
         produtoSelect.val("").trigger("change");
-        quantidadeInput.val("");
-        quantidadeQuilosInput.val("");
-        quantidadeGramasInput.val("");
+        $("#quantidade, #quantidade-quilos, #quantidade-gramas").val("");
 
         novaLinha.find(".remover-produto").on("click", () => {
             totalCompra -= precoTotal;
@@ -115,9 +104,16 @@ $(document).ready(() => {
             novaLinha.remove();
         });
 
-        // Atualizar total ao editar a quantidade
-        novaLinha.find(".quantidade-editar").on("input", () => {
-            const novaQuantidade = parseFloat(novaLinha.find(".quantidade-editar").val());
+        novaLinha.find(".quantidade-editar").on("input", function () {
+            let novaQuantidade = vendidoKilo 
+                ? parseFloat($(this).val()) 
+                : parseInt($(this).val()); // Impede valores decimais para produtos por unidade
+
+            if (isNaN(novaQuantidade) || novaQuantidade <= 0) {
+                $(this).val(vendidoKilo ? "0.01" : "1"); // Define valor mínimo adequado
+                novaQuantidade = vendidoKilo ? 0.01 : 1;
+            }
+
             const novoPrecoTotal = precoUnitario * novaQuantidade;
             novaLinha.find(".preco-total").text(`R$ ${novoPrecoTotal.toFixed(2)}`);
             totalCompra = 0;
@@ -130,7 +126,6 @@ $(document).ready(() => {
         });
     });
 
-    // Atualizar campos ao carregar a página, se necessário
     atualizarCamposQuantidade();
 
     $("#form-compra").on("submit", async (e) => {
@@ -153,7 +148,7 @@ $(document).ready(() => {
             const rowEl = $(row);
             itens.push({
                 id_produto: rowEl.data("id"),
-                quantidade: parseInt(rowEl.find("td:nth-child(2) input").val()), // Editar a quantidade
+                quantidade: parseFloat(rowEl.find(".quantidade-editar").val()),
                 preco_unitario: parseFloat(rowEl.find("td:nth-child(3)").text().replace("R$ ", ""))
             });
         });
@@ -167,7 +162,7 @@ $(document).ready(() => {
 
         const compraData = {
             tipo_pagamento: tipoPagamento,
-            id_cliente: idCliente || null, // Enviar o ID do cliente
+            id_cliente: idCliente || null,
             itens,
         };
 

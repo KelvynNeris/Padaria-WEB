@@ -44,6 +44,10 @@ body {
     margin-top: 0.5rem;
 }
 
+.card_pago {
+    background-color: #bcfec0;
+}
+
 .pendente {
     background-color: #ffcccb;
 }
@@ -85,12 +89,18 @@ th, td {
     background-color: #f1f1f1;
 }
 
+.card_pago {
+    color: green;
+    font-weight: bold;
+}
+
 .pendente {
     color: red;
     font-weight: bold;
 }
 
 .pago {
+    background-color: #bcfec0;
     color: green;
     font-weight: bold;
 }
