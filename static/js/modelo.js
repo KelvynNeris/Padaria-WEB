@@ -1,8 +1,5 @@
-function toggleMenu(x) {
-    // Alternar animação do botão hambúrguer
-    x.classList.toggle("change");
-
-    // Abrir ou fechar o menu
-    const menu = document.getElementById("menu");
-    menu.classList.toggle("open");
-}
+document.querySelector('.menu-icon').addEventListener('click', function() {
+    const navbarLinks = document.querySelector('.navbar-links');
+    navbarLinks.classList.toggle('open');
+    this.classList.toggle('change'); // Para a animação do ícone de hambúrguer
+});

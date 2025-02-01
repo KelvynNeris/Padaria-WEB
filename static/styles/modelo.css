@@ -15,16 +15,16 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
-    width: 100%;
+    width: 100vw;
 }
 
 .navbar-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
     margin: 0 auto;
     width: 100%;
+    height: 3rem;
 }
 
 .navbar-logo {
@@ -37,9 +37,10 @@ body {
 
 .navbar-links {
     list-style: none;
-    display: flex;
     gap: 1.5rem;
     transition: all 0.3s ease-in-out;
+    display: flex; /* Exibe os links de navegação em todas as resoluções */
+    margin: 0; /* Remove margens extras */
 }
 
 .navbar-links li {
@@ -76,7 +77,7 @@ body {
 }
 
 .menu-icon {
-    display: flex; /* Agora está visível por padrão */
+    display: flex; /* Exibe o ícone de hambúrguer em todas as resoluções */
     flex-direction: column;
     gap: 5px;
     cursor: pointer;
@@ -102,23 +103,12 @@ body {
 }
 
 /* Responsividade */
-@media (min-width: 769px) {
-    .menu-icon {
-        display: none; /* Oculta o ícone em telas maiores */
-    }
-
-    .navbar-links {
-        flex-direction: row; /* Links em linha */
-        gap: 1.5rem;
-        height: auto; /* Exibe sempre os links */
-        position: static; /* Reseta a posição */
-        background-color: transparent; /* Sem fundo adicional */
-        box-shadow: none; /* Sem sombra */
-        overflow: visible; /* Links sempre visíveis */
-    }
-}
-
 @media (max-width: 768px) {
+
+    .btn-voltar {
+        margin-top: 4rem;
+    }
+
     .navbar-logo {
         font-size: 1rem;
     }
@@ -129,32 +119,34 @@ body {
     }
 
     .navbar-links {
+        display: none; /* Menu oculto por padrão em telas pequenas */
         flex-direction: column;
         gap: 2rem;
         width: 100%;
-        max-height: 0; /* Define altura inicial como 0 */
-        overflow: hidden;
         background-color: #d4a373;
         position: absolute;
         top: 100%;
         left: 0;
-        padding: 0; /* Remove padding no estado inicial */
+        padding: 0;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: max-height 0.5s ease, padding 0.3s ease; /* Transição suave para padding e altura */
+        transform: translateX(100%); /* Inicialmente à direita fora da tela */
+        opacity: 0; /* Invisível */
+        transition: transform 0.3s ease, opacity 0.3s ease; /* Adiciona a transição */
     }
 
     .navbar-links.open {
-        max-height: 500px; /* Define um valor máximo suficiente para o menu expandido */
-        padding: 1rem 0; /* Adiciona padding ao abrir */
+        display: flex; /* Exibe o menu quando ativado */
+        transform: translateX(0); /* Animação de deslizar da direita para a esquerda */
+        opacity: 1; /* Torna o menu visível */
     }
 
     .navbar-links li {
-        text-align: center; /* Centraliza os itens */
-        padding: 0.5rem 1rem; /* Adiciona espaçamento interno aos itens */
+        text-align: center;
+        padding: 0.5rem 1rem;
     }
 
     .navbar-links a {
-        display: block; /* Garante que o link ocupe toda a área do item */
+        display: block;
         color: #fff;
         font-size: 1.2rem;
         text-decoration: none;
@@ -165,7 +157,45 @@ body {
         color: #ffd700;
     }
 }
-    
+
+/* Para telas grandes, o hambúrguer também deve funcionar */
+@media (min-width: 769px) {
+    .navbar-links {
+        display: none; /* Oculta os links por padrão */
+        flex-direction: column;
+        gap: 1.5rem;
+        width: 100%;
+        background-color: #d4a373;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        padding: 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transform: translateX(100%); /* Inicialmente à direita fora da tela */
+        opacity: 0; /* Invisível */
+        transition: transform 0.3s ease, opacity 0.3s ease; /* Transição suave */
+    }
+
+    .navbar-links li {
+        text-align: center;
+        padding: 0.5rem 1rem;
+    }
+
+    .navbar-links.open {
+        display: flex; /* Exibe o menu quando ativado */
+        transform: translateX(0); /* Animação de deslizar da direita para a esquerda */
+        opacity: 1; /* Torna o menu visível */
+    }
+
+    .menu-icon {
+        display: flex; /* Mostra o ícone de hambúrguer em telas grandes também */
+    }
+
+    .btn-voltar {
+        margin-top: 4rem;
+    }
+}
+
 /* Footer (opcional para maior consistência) */
 footer {
     background-color: #d4a373;

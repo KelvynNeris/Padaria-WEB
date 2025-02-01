@@ -1,95 +1,192 @@
-html{
-    overflow: hidden;
+/* Reset e Configurações Globais */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
 }
 
-.btn-voltar{
-    width: 2rem;
-    height: 2rem;
-    overflow: hidden;
-    position: absolute;
-    top: 0;
-    left: 0;
-    margin: 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 0.01rem solid black;
-    cursor: pointer;
+body {
+    background-color: #FAF3E0; /* Tom de fundo agradável para padarias */
+    min-height: 100vh;
 }
 
-.btn-voltar button{
-    cursor: pointer;
-    width: 70%;
-    height: 70%;
+/* Oculta elementos desnecessários */
+.espacamento, .cbc-cima, .gambiarra {
+    display: none !important;
 }
 
-.btn-voltar button img{
-    background-color: white;
-    width: 100%;
-}
-
-main{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.titulo, .titulo h2{
-    width: 25rem;
-    text-align: start;
-}
-
-.container-principal{
-    display: flex;
-    flex-direction: column;
-    width: 25rem;
-    height: 18.5rem;
-}
-
-.formulario{
-    display: flex;
-    width: 100%;
-    height: 100%;
-}
-
-.formulario form{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-}
-
-.formulario form input{
-    width: 100%;
-    height: 3rem;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    margin-top: 2rem;
-}
-
-.formulario form input:focus{
-    border: none;
-    outline: none;
-    background-color: rgb(241, 241, 241);
-}
-
-.formulario a{
-    color: black;
-    text-decoration: none;
-    margin-top: 0.2rem;
-    width: 25rem;
-    text-align: end;
-}
-
-.formulario button{
-    width: 100%;
-    height: 3rem;
-    margin-top: 2.5rem;
-    cursor: pointer;
-}
-
-.container-principal span{
+/* Estilização Geral */
+.titulo {
+    margin-bottom: 20px;
     text-align: center;
+    opacity: 0;
+    animation: fadeIn 1s forwards;
+    color: #A45C40;
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.container-principal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* Estilização do Formulário */
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    background: #FFF;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    animation: slideUp 0.8s forwards;
+}
+
+form input, .select select {
+    width: 100%;
+    height: 45px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 2px solid #E0C3A5;
+    background-color: #FDF8F1;
+    margin-top: 15px;
+    font-size: 16px;
+    transition: border-color 0.3s, transform 0.2s;
+}
+
+input::placeholder {
+    color: #B08B67;
+}
+
+form input:focus, .select select:focus {
+    outline: none;
+    border-color: #A45C40;
+    transform: scale(1.02);
+}
+
+/* Botão de Entrar */
+.container-principal button {
+    width: 100%;
+    padding: 15px;
+    background-color: #A45C40;
+    color: white;
+    border-radius: 6px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    margin-top: 20px;
+}
+
+.container-principal button:hover {
+    background-color: #8B4A33;
+    transform: scale(1.05);
+}
+
+/* Links */
+form a {
+    margin-top: 10px;
+    color: #A45C40;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s;
+}
+
+form a:hover {
+    text-decoration: underline;
+    color: #8B4A33;
+}
+
+/* Botão de Voltar */
+.btn-voltar {
+    margin-bottom: 20px;
+}
+
+.btn-voltar button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: transparent;
+    border: 1px solid #E0C3A5;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.btn-voltar button:hover {
+    background-color: #FDF8F1;
+    transform: scale(1.1);
+}
+
+.btn-voltar img {
+    height: 20px;
+}
+
+/* Estilização do Popup de Erro */
+.popup-container {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    animation: slideIn 0.5s forwards;
+}
+
+.alert-popup {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #FFE5D4;
+    border-left: 6px solid #D9534F;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 1s forwards;
+}
+
+.alert-message {
+    color: #D9534F;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+    form {
+        padding: 1.5rem;
+    }
+
+    .titulo h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Animações */
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }

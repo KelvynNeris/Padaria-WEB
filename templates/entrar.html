@@ -1,16 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrar</title>
-</head>
-
+{% extends "modelo.html" %}
+{% block conteudo %}
 <link rel="stylesheet" href="../static/styles/entrar.css">
-<link rel="stylesheet" href="../static/styles/global.css">
-<link rel="stylesheet" href="../static/styles/media/media-entrar.css">
 
-<!-- {% if erro %}
+{% if erro %}
 <div class="popup-container" style="display: flex;">
     <div class="popup alert-popup">
         <div class="popup-icon alert-icon">
@@ -23,7 +15,7 @@
         <div class="alert-message">Login ou senha inválidos!</div>
     </div>
 </div>
-{% endif %} -->
+{% endif %}
 
 <body>
 
@@ -56,10 +48,4 @@
 
     </main>
 
-</body>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script src="/static/js/entrar.js"></script>
-
-</html>
+    {% endblock %}
