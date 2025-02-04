@@ -60,9 +60,9 @@ def enviar_email(destinatario, codigo_verificacao):
 
         msg = email.message.Message()
         msg['Subject'] = "Código de Verificação"
-        msg['From'] = 'kelvyn.neris4305@gmail.com'  # Substitua pelo seu e-mail
+        msg['From'] = 'teste.padaria321@gmail.com'  # Substitua pelo seu e-mail
         msg['To'] = destinatario  # Substitua pelo e-mail do destinatário
-        password = 'yjnr ycly yaes xzur'  # Substitua pela sua senha
+        password = 'heur ktwi qjsw ztim'  # Substitua pela sua senha
 
         # Definindo o tipo de conteúdo como HTML
         msg.add_header('Content-Type', 'text/html')
