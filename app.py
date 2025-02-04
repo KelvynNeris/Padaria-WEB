@@ -13,7 +13,7 @@ from collections import defaultdict
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = '988430466tel'  # Chave secreta para gerenciamento de sessões
+app.secret_key = '0000'  # Chave secreta para gerenciamento de sessões
 
 def verificar_sessao():
     """
