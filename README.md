@@ -54,13 +54,13 @@ cd padaria-gestao
 python -m venv venv
 ```
 
-No Linux/Mac:
+- No Linux/Mac:
 
 ```bash
 source venv/bin/activate
 ```
 
-No Windows:
+- No Windows:
 
 ```bash
 venv\Scripts\activate
