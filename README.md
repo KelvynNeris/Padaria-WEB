@@ -1,6 +1,6 @@
-# Padaria Gestão
+# Padaria WEB
 
-O **Padaria Gestão** é um sistema web para gerenciamento de uma padaria, desenvolvido para facilitar o controle de vendas, estoque e transações fiadas, além de gerar relatórios detalhados sobre itens, categorias e métodos de pagamento. O sistema também inclui um módulo específico para o controle de fiado, permitindo acompanhar o valor total fiado, os pagamentos realizados e o saldo pendente.
+O **Padaria WEB** é um sistema web para gerenciamento de uma padaria, desenvolvido para facilitar o controle de vendas, estoque e transações fiadas, além de gerar relatórios detalhados sobre itens, categorias e métodos de pagamento. O sistema também inclui um módulo específico para o controle de fiado, permitindo acompanhar o valor total fiado, os pagamentos realizados e o saldo pendente.
 
 ---
 
