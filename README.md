@@ -47,3 +47,78 @@ Abra o terminal e execute:
 ```bash
 git clone https://github.com/seu-usuario/padaria-gestao.git
 cd padaria-gestao
+```
+### 2. Crie e Ative um Ambiente Virtual
+
+```bash
+python -m venv venv
+```
+
+No Linux/Mac:
+
+```bash
+source venv/bin/activate
+```
+
+No Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+### 3. Instale as Dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure o Banco de Dados
+
+- Crie um banco de dados MySQL (por exemplo, padaria_gestao).
+- Execute os scripts SQL disponíveis na pasta database para criar as tabelas necessárias (ex.: tb_vendas, tb_produtos, tb_clientes_fiado, etc.).
+- Atualize as configurações de conexão no arquivo config.py com os parâmetros do seu banco de dados.
+
+## Estrutura do Projeto
+
+```csharp
+padaria-gestao/
+├── app.py                  # Arquivo principal do Flask
+├── config.py               # Configurações do projeto (ex.: conexão com o banco de dados)
+├── requirements.txt        # Dependências do projeto
+├── templates/              # Templates HTML (ex.: modelo.html, relatorio_mais_vendidos.html, relatorio_fiado.html, etc.)  
+├── static/                 # Arquivos estáticos\n│   ├── css/            # Arquivos CSS\n│   ├── js/             # Arquivos JavaScript\n│   └── images/         # Imagens e ícones\n└── database/            # Scripts SQL para criação do banco de dados
+```
+
+### Fluxo de Trabalho
+
+## 1. Cadastro de Produtos:
+
+- Adicione, edite ou remova produtos do estoque.
+- Defina se o produto é vendido por unidade ou por quilo, com os respectivos preços.
+
+## 2. Registro de Vendas:
+
+- Selecione os produtos e registre as vendas.
+- Escolha o método de pagamento, incluindo a opção "Fiado" para transações a prazo.
+
+## 3. Gestão de Fiado:
+
+- Acesse o relatório de fiado para visualizar as transações pendentes.
+- Utilize o formulário com AJAX para atualizar os pagamentos das transações fiadas.
+- O sistema calcula automaticamente o total fiado, o valor pago e o saldo pendente.
+
+## 4. Relatórios Dinâmicos
+
+- Visualize relatórios com filtros por data, quantidade vendida e total arrecadado.
+- Analise o desempenho dos produtos, categorias e métodos de pagamento.
+
+### Funcionalidades Adicionais
+
+## 1. Atualização via AJAX:
+- Permite atualizar os pagamentos das transações fiadas sem recarregar a página, com feedback imediato ao usuário.
+
+## 2. Filtros Dinâmicos:
+- Relatórios com filtros por data, quantidade vendida e total arrecadado, permitindo uma análise detalhada do desempenho da padaria.
+
+## 3. Design Inspirado na Paleta de Cores da Padaria:
+- Cores quentes, aconchegantes e animações suaves para uma experiência visual agradável e moderna.
