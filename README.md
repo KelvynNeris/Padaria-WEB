@@ -112,6 +112,11 @@ padaria-gestao/
 - Visualize relatórios com filtros por data, quantidade vendida e total arrecadado.
 - Analise o desempenho dos produtos, categorias e métodos de pagamento.
 
+## 5. Cadastro de Usuários e Funcionários:
+
+- O usuário master, que já está previamente cadastrado no banco, pode acessar e alterar suas informações pessoais.
+- Funcionários podem enviar pedidos de cadastro, que serão gerenciados e aprovados pelo sistema.
+
 ### Funcionalidades Adicionais
 
 ## 1. Atualização via AJAX:
